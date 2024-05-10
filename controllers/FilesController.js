@@ -18,21 +18,26 @@ export async function postUpload(req, res) {
   }
 
   // Retrieve tha file's informations from req.body and handlr any missing one
+
+  // The name
   const name = req.body.name;
   if (!name) {
     return res.status(400).json({ error: 'Missing name' });
   }
 
+  // The type
   const type = req.body.type;
-  if (!type || !(['folder', 'file', 'image'].includes(type]))) {
+  if (!type || !(['folder', 'file', 'image'].includes(type))) {
     return res.status(400).json({ error: 'Missing type' });
   }
 
+  // The data
   const data = req.body.data;
   if (!data && type !== 'folder') {
     return res.status(400).json({ error: 'Missing data' });
   }
 
+  // The Parent ID (optional)
   const parentId = req.body.parentId ? req.body.parentId : 0;
   if (parentId !== 0) {
 
@@ -48,5 +53,23 @@ export async function postUpload(req, res) {
     }
   }
 
+  // Is it public? (optional)
   const isPublic = req.body.isPublic ? req.body.isPublic : false;
+
+  // Let's upload
+
+  // If it is a folder
+  if (type === 'folder') {
+
+    // Create folder's MongoDB document
+    const folder = { userId, name, type, isPublic, parentId };
+
+    // Insert to DB
+    await dbClient.insertOne('files', folder);
+
+    // Return response
+    folder.id = folder._id;
+    delete folder._id;
+    return res.status(201).json(folder);
+  }
 }
