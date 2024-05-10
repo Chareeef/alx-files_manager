@@ -1,8 +1,9 @@
-import redisClient from './utils/redis';
+import redisClient from '../utils/redis';
 
 (async () => {
     console.log(true, redisClient.isAlive());
     console.log(null, await redisClient.get('myKey'));
+    console.log(true, redisClient.isAlive());
     await redisClient.set('myKey', 12, 3);
     console.log(12, await redisClient.get('myKey'));
 
@@ -10,7 +11,6 @@ import redisClient from './utils/redis';
     console.log(89, await redisClient.get('key'));
     await redisClient.del('key');
     console.log(null, await redisClient.get('key'));
-    console.log('Error:');
     await redisClient.del('key');
 
     setTimeout(async () => {

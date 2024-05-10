@@ -7,13 +7,12 @@ class RedisClient {
     this.isConnected = false;
 
     this.client
-      .on('error', (err) => console.log(err))
-      .on('connect', () => (this.isConnected = true));
+      .on('error', (err) => console.log(err.message));
   }
 
   // Check if the redis client is connected
   isAlive() {
-    return this.isConnected;
+    return this.client.connected;
   }
 
   // Get a key's value
@@ -47,4 +46,5 @@ class RedisClient {
 
 // Export a RedisClient instance
 const redisClient = new RedisClient();
+
 export default redisClient;
