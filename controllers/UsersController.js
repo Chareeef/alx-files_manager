@@ -16,7 +16,7 @@ export async function postNew(req, res) {
     return;
   }
 
-  const user = await dbClient.userExists(email);
+  const user = await dbClient.db.collection('users').findOne({ email });
   if (user) {
     res.status(400).json({ error: 'Already exist' });
     res.end();
