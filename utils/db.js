@@ -39,8 +39,12 @@ class DBClient {
   async insert(coll, ...docs) {
     this.db.collection(coll).insertMany(docs);
   }
-}
 
+  // Find a document in a collection
+  async findOne(coll, filter) {
+    return this.db.collection(coll).findOne(filter);
+  }
+}
 // Export a DBClient instance
 const dbClient = new DBClient();
 
