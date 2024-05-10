@@ -15,7 +15,7 @@ router.get('/stats', async (req, res) => {
   res.json(await getStats());
 });
 
-router.post('/postNew', async (req, res) => {
+router.post('/users', async (req, res) => {
   res.json(await postNew(req, res));
 });
 
