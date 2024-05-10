@@ -31,5 +31,9 @@ router.get('/connect', async (req, res) => {
   await getConnect(req, res);
 });
 
+router.get('/disconnect', async (req, res) => {
+  await disconnect(req, res);
+});
+
 // Export router
 export default router;

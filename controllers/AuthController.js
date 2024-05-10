@@ -27,3 +27,18 @@ export async function getConnect(req, res) {
   redisClient.set(`auth_${token}`, user._id.toString(), 24 * 3600);
   return res.json({ token });
 }
+
+export async function disconnect(req, res) {
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const userId = redisClient.get(`auth_${token}`);
+  const user = dbClient.findOne('users', { _id: new ObjectId(userId) });
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  await redisClient.del(`auth_${token}`);
+  return res.status(204);
+}
