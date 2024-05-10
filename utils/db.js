@@ -34,6 +34,11 @@ class DBClient {
   async nbFiles() {
     return this.db.collection('files').countDocuments({});
   }
+
+  // Insert documents into a collection
+  async insert(coll, ...docs) {
+    this.db.collection(coll).insertMany(docs);
+  }
 }
 
 // Export a DBClient instance

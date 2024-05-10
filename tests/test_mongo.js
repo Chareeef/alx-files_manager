@@ -21,6 +21,7 @@ const waitConnection = () => new Promise((resolve, reject) => {
   console.log(dbClient.isAlive());
   await waitConnection();
   console.log(dbClient.isAlive());
+  await dbClient.insert('users', { name: 'Omar' });
   console.log(await dbClient.nbUsers());
   console.log(await dbClient.nbFiles());
 })();
