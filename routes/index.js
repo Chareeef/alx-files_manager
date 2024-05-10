@@ -3,6 +3,7 @@ import { getStatus, getStats } from '../controllers/AppController';
 import { getConnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
 import { disconnect } from '../controllers/AuthController';
+import { postUpload } from '../controllers/FilesController';
 
 // Create router
 const router = express.Router();
@@ -35,6 +36,11 @@ router.get('/connect', async (req, res) => {
 // 'GET /disconnect' route
 router.get('/disconnect', async (req, res) => {
   await disconnect(req, res);
+});
+
+// 'POST /files' route
+router.post('/files', async (req, res) => {
+  await postUpload(req, res);
 });
 
 // Export router
