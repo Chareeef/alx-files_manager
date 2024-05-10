@@ -2,7 +2,8 @@ import dbClient from '../utils/db';
 import sha1 from 'sha1';
 
 export async function postNew(req, res) {
-  const { email, password } = req.body;
+  const email = req.body ? req.body.email : null;
+  const password = req.body ? req.body.password : null;
 
   if (!email) {
     res.status(400).json({ error: 'Missing email' });
