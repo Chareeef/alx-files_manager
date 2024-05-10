@@ -32,6 +32,7 @@ router.get('/connect', async (req, res) => {
   await getConnect(req, res);
 });
 
+// 'GET /disconnect' route
 router.get('/disconnect', async (req, res) => {
   await disconnect(req, res);
 });
