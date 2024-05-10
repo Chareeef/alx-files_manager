@@ -5,6 +5,7 @@ import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 export async function getConnect(req, res) {
+
   // Retrieve 'Authorization' Basic Auth string
   const authBase64 = req.headers.authorization.slice(6);
   if (!authBase64) {
@@ -40,6 +41,8 @@ export async function disconnect(req, res) {
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
   await redisClient.del(`auth_${token}`);
-  return res.status(204);
+
+  return res.status(204).end();
 }
