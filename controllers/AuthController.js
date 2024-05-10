@@ -35,7 +35,7 @@ export async function disconnect(req, res) {
   }
 
   const userId = redisClient.get(`auth_${token}`);
-  const user = dbClient.findOne('users', { _id: new ObjectId(userId) });
+  const user = dbClient.findOne('users', { _id: userId });
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
