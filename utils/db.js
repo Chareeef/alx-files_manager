@@ -39,10 +39,6 @@ class DBClient {
   async insert(coll, ...docs) {
     this.db.collection(coll).insertMany(docs);
   }
-
-  async insertOne(coll, data) {
-    return this.db.collection(coll).insertOne(data);
-  }
 }
 
 // Export a DBClient instance
