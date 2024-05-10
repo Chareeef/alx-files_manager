@@ -22,7 +22,7 @@ export async function postNew(req, res) {
     res.end();
     return;
   }
-  const insertInfo = await dbClient.insertOne('users', {
+  const insertInfo = await dbClient.db.collection('users').insertOne({
     email,
     password: sha1(password),
   });
