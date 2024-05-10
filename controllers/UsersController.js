@@ -1,4 +1,5 @@
 import dbClient from '../utils/db';
+import { ObjectId } from 'mongodb';
 import redisClient from '../utils/redis';
 import sha1 from 'sha1';
 
@@ -41,11 +42,8 @@ export async function getMe(req, res) {
   }
 
   // Check token
-  console.log('token:', token);
   const userId = await redisClient.get(`auth_${token}`);
-  console.log('userId:', userId);
-  const user = await redisClient.findOne('users', { _id: userId };
-  console.log('user:', user);
+  const user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

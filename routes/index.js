@@ -1,7 +1,7 @@
 import express from 'express';
 import { getStatus, getStats } from '../controllers/AppController';
-import { postNew } from '../controllers/UsersController';
 import { getConnect } from '../controllers/AuthController';
+import { postNew, getMe } from '../controllers/UsersController';
 
 // Create router
 const router = express.Router();
@@ -16,9 +16,14 @@ router.get('/stats', async (req, res) => {
   res.json(await getStats());
 });
 
-// 'GET /users' route
+// 'POST /users' route
 router.post('/users', async (req, res) => {
   await postNew(req, res);
+});
+
+// 'GET /users/me' route
+router.get('/users/me', async (req, res) => {
+  await getMe(req, res);
 });
 
 // 'GET /connect' route
