@@ -35,6 +35,11 @@ class DBClient {
     return this.db.collection('files').countDocuments({});
   }
 
+  // Insert one document into a collection
+  async insertOne(coll, doc) {
+    return this.db.collection(coll).insertOne(doc);
+  }
+
   // Insert documents into a collection
   async insert(coll, ...docs) {
     this.db.collection(coll).insertMany(docs);
