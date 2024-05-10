@@ -1,5 +1,6 @@
 import express from 'express';
 import { getStatus, getStats } from '../controllers/AppController';
+import { postNew } from '../controllers/UsersController';
 
 // Create router
 const router = express.Router();
@@ -14,7 +15,9 @@ router.get('/stats', async (req, res) => {
   res.json(await getStats());
 });
 
-router.post('/postNew');
+router.post('/postNew', async (req, res) => {
+  res.json(await postNew(req, res));
+});
 
 // Export router
 export default router;
