@@ -2,7 +2,7 @@ import express from 'express';
 import router from './routes/index';
 
 // Create Express app
-const app = express()
+const app = express();
 
 // Use router
 app.use(express.json());

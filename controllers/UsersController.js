@@ -1,5 +1,5 @@
-import dbClient from '../utils/db';
 import sha1 from 'sha1';
+import dbClient from '../utils/db';
 
 export async function postNew(req, res) {
   const email = req.body ? req.body.email : null;
@@ -28,5 +28,5 @@ export async function postNew(req, res) {
   });
 
   const userID = insertInfo.insertedId.toString();
-  res.status(201).json({ id: userID, email: email });
+  res.status(201).json({ id: userID, email });
 }
