@@ -5,6 +5,7 @@ import router from './routes/index';
 const app = express()
 
 // Use router
+app.use(express.json());
 app.use('/', router);
 
 // Start listening
