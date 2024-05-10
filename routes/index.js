@@ -16,7 +16,7 @@ router.get('/stats', async (req, res) => {
 });
 
 router.post('/users', async (req, res) => {
-  res.json(await postNew(req, res));
+  await postNew(req, res);
 });
 
 // Export router
