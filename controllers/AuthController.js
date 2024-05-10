@@ -1,5 +1,6 @@
 import sha1 from 'sha1';
 import { v4 as uuidv4 } from 'uuid';
+import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -35,7 +36,7 @@ export async function disconnect(req, res) {
   }
 
   const userId = redisClient.get(`auth_${token}`);
-  const user = dbClient.findOne('users', { _id: userId });
+  const user = dbClient.findOne('users', { _id: new ObjectId(userId) });
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
