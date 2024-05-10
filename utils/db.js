@@ -39,6 +39,26 @@ class DBClient {
   async insert(coll, ...docs) {
     this.db.collection(coll).insertMany(docs);
   }
+
+  async insertOne(coll, data) {
+    return this.db.collection(coll).insertOne(data);
+  }
+
+  async getUser(email) {
+    const user = this.db.collection('users').find({ email }).toArray();
+    if (!user.length) {
+      return null;
+    }
+    return user[0];
+  }
+
+  async userExists(email) {
+    const user = await this.getUser(email);
+    if (!user) {
+      return false;
+    }
+    return true;
+  }
 }
 
 // Export a DBClient instance
