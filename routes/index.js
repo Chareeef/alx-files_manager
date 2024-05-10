@@ -10,8 +10,8 @@ router.get('/status', (req, res) => {
 });
 
 // 'GET /stats' route
-router.get('/stats', (req, res) => {
-  res.json(getStats());
+router.get('/stats', async (req, res) => {
+  res.json(await getStats());
 });
 
 // Export router
