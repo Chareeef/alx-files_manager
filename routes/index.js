@@ -2,6 +2,7 @@ import express from 'express';
 import { getStatus, getStats } from '../controllers/AppController';
 import { getConnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
+import { disconnect } from '../controllers/AuthController';
 
 // Create router
 const router = express.Router();
