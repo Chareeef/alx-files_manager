@@ -22,14 +22,14 @@ class RedisClient {
     try {
       return await getAsync(key);
     } catch (err) {
-      return null
+      return null;
     }
   }
 
   // Set a key-value pair with expiration time
-  async set(key, value, ex_time) {
+  async set(key, value, exTime) {
     const setAsync = promisify(this.client.setex).bind(this.client);
-    await setAsync(key, ex_time, value);
+    await setAsync(key, exTime, value);
   }
 
   // Delete a key
