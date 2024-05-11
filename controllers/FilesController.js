@@ -19,7 +19,7 @@ export async function postUpload(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // Retrieve tha file's informations from req.body and handlr any missing one
+  // Retrieve tha file's information from req.body and handle any missing one
 
   // The name
   const { name } = req.body;
@@ -29,7 +29,7 @@ export async function postUpload(req, res) {
 
   // The type
   const { type } = req.body;
-  if (!type || !(['folder', 'file', 'image'].includes(type))) {
+  if (!type || !['folder', 'file', 'image'].includes(type)) {
     return res.status(400).json({ error: 'Missing type' });
   }
 
@@ -43,7 +43,9 @@ export async function postUpload(req, res) {
   const parentId = req.body.parentId ? req.body.parentId : 0;
   if (parentId !== 0) {
     // Check if the parent folder exists
-    const parentFolder = dbClient.findOne('files', { _id: new ObjectId(parentId) });
+    const parentFolder = dbClient.findOne('files', {
+      _id: new ObjectId(parentId),
+    });
     if (!parentFolder) {
       return res.status(400).json({ error: 'Parent not found' });
     }
@@ -63,7 +65,11 @@ export async function postUpload(req, res) {
   if (type === 'folder') {
     // Create folder's MongoDB document
     const folder = {
-      userId, name, type, isPublic, parentId,
+      userId,
+      name,
+      type,
+      isPublic,
+      parentId,
     };
 
     // Insert to DB
@@ -71,21 +77,34 @@ export async function postUpload(req, res) {
 
     // Return response
     return res.status(201).json({
-      id: folder._id, userId, name, type, isPublic, parentId,
+      id: folder._id,
+      userId,
+      name,
+      type,
+      isPublic,
+      parentId,
     });
-  } // Image or file
-
+  }
+  // Image or file
   // Create directory if not exists
   const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
   await promisify(fs.mkdir)(folderPath, { recursive: true });
 
   // Write to file
   const localPath = `${folderPath}/${uuidv4()}`;
-  await promisify(fs.writeFile)(localPath, Buffer.from(data, 'base64').toString('utf-8'));
+  await promisify(fs.writeFile)(
+    localPath,
+    Buffer.from(data, 'base64').toString('utf-8')
+  );
 
   // Create file's MongoDB document
   const file = {
-    userId, name, type, isPublic, parentId, localPath,
+    userId,
+    name,
+    type,
+    isPublic,
+    parentId,
+    localPath,
   };
 
   // Insert to DB
@@ -93,7 +112,12 @@ export async function postUpload(req, res) {
 
   // Return response
   return res.status(201).json({
-    id: file._id, userId, name, type, isPublic, parentId,
+    id: file._id,
+    userId,
+    name,
+    type,
+    isPublic,
+    parentId,
   });
 }
 
