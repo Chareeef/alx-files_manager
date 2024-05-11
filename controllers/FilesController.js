@@ -177,7 +177,7 @@ export async function getIndex(req, res) {
     .aggregate([
       { $match: matchQuery },
       { $sort: { _id: -1 } },
-      { $skip: page * 20 },
+      { $skip: pageNum * 20 },
       { $limit: 20 },
       {
         $project: {
