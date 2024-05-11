@@ -2,7 +2,7 @@ import express from 'express';
 import { getStatus, getStats } from '../controllers/AppController';
 import { getConnect, disconnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
-import { postUpload } from '../controllers/FilesController';
+import { postUpload, getShow, getIndex } from '../controllers/FilesController';
 
 // Create router
 const router = express.Router();
@@ -40,6 +40,16 @@ router.get('/disconnect', async (req, res) => {
 // 'POST /files' route
 router.post('/files', async (req, res) => {
   await postUpload(req, res);
+});
+
+// GET /files/:id
+router.get('/files/:id', async (req, res) => {
+  await getShow(req, res);
+});
+
+// GET /files
+router.get('/files', async (req, res) => {
+  await getIndex(req, res);
 });
 
 // Export router

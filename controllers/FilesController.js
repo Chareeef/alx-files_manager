@@ -98,6 +98,29 @@ export async function postUpload(req, res) {
 }
 
 export async function getShow() {
+  // Retrieve token from 'X-Token' header
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Check token
+  const userId = await redisClient.get(`auth_${token}`);
+  const user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // /files/:id
+  const fileId = req.params.id;
+  const file = await dbClient.findOne('files', { _id: new ObjectId(fileId), userId: user._id });
+  if (!file) {
+    return response.status(404).json({ error: 'Not found' });
+  }
+  return response.status(200).json(file);
+}
+
+export async function getIndex() {
   // temporary
   return null;
 }
