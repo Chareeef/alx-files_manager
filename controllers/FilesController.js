@@ -168,9 +168,12 @@ export async function getIndex(req, res) {
   let matchQuery;
 
   if (!parentId) {
-    matchQuery = { userId: user._id };
+    matchQuery = { userId: user._id.toString() };
   } else {
-    matchQuery = { userId: user._id, parentId: new ObjectId(parentId) };
+    matchQuery = {
+      userId: user._id.toString(),
+      parentId: new ObjectId(parentId),
+    };
   }
 
   const files = await filesCollection
