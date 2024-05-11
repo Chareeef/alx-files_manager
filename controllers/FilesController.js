@@ -1,6 +1,9 @@
 import dbClient from '../utils/db'
 import redisClient from '../utils/redis';
+import fs from 'fs';
 import { ObjectId } from 'mongodb';
+import { promisify } from 'util';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function postUpload(req, res) {
 
@@ -68,8 +71,25 @@ export async function postUpload(req, res) {
     await dbClient.insertOne('files', folder);
 
     // Return response
-    folder.id = folder._id;
-    delete folder._id;
-    return res.status(201).json(folder);
+    return res.status(201).json({ id: folder._id, userId, name, type, isPublic, parentId });
+
+  } else { // Image or file
+
+    // Create directory if not exists
+    const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
+    await promisify(fs.mkdir)(folderPath, { recursive: true });
+
+    // Write to file
+    const localPath = `${folderPath}/${uuidv4()}`;
+    await promisify(fs.writeFile)(localPath, Buffer.from(data, 'base64').toString('utf-8'));
+
+    // Create file's MongoDB document
+    const file = { userId, name, type, isPublic, parentId, localPath};
+
+    // Insert to DB
+    await dbClient.insertOne('files', file);
+
+    // Return response
+    return res.status(201).json({ id: file._id, userId, name, type, isPublic, parentId });
   }
 }
