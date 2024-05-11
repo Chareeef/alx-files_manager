@@ -1,12 +1,11 @@
-import dbClient from '../utils/db'
-import redisClient from '../utils/redis';
 import fs from 'fs';
 import { ObjectId } from 'mongodb';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
+import redisClient from '../utils/redis';
+import dbClient from '../utils/db';
 
 export async function postUpload(req, res) {
-
   // Retrieve token from 'X-Token' header
   const token = req.headers['x-token'];
   if (!token) {
@@ -23,19 +22,19 @@ export async function postUpload(req, res) {
   // Retrieve tha file's informations from req.body and handlr any missing one
 
   // The name
-  const name = req.body.name;
+  const { name } = req.body;
   if (!name) {
     return res.status(400).json({ error: 'Missing name' });
   }
 
   // The type
-  const type = req.body.type;
+  const { type } = req.body;
   if (!type || !(['folder', 'file', 'image'].includes(type))) {
     return res.status(400).json({ error: 'Missing type' });
   }
 
   // The data
-  const data = req.body.data;
+  const { data } = req.body;
   if (!data && type !== 'folder') {
     return res.status(400).json({ error: 'Missing data' });
   }
@@ -43,7 +42,6 @@ export async function postUpload(req, res) {
   // The Parent ID (optional)
   const parentId = req.body.parentId ? req.body.parentId : 0;
   if (parentId !== 0) {
-
     // Check if the parent folder exists
     const parentFolder = dbClient.findOne('files', { _id: new ObjectId(parentId) });
     if (!parentFolder) {
@@ -63,33 +61,43 @@ export async function postUpload(req, res) {
 
   // If it is a folder
   if (type === 'folder') {
-
     // Create folder's MongoDB document
-    const folder = { userId, name, type, isPublic, parentId };
+    const folder = {
+      userId, name, type, isPublic, parentId,
+    };
 
     // Insert to DB
     await dbClient.insertOne('files', folder);
 
     // Return response
-    return res.status(201).json({ id: folder._id, userId, name, type, isPublic, parentId });
+    return res.status(201).json({
+      id: folder._id, userId, name, type, isPublic, parentId,
+    });
+  } // Image or file
 
-  } else { // Image or file
+  // Create directory if not exists
+  const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
+  await promisify(fs.mkdir)(folderPath, { recursive: true });
 
-    // Create directory if not exists
-    const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-    await promisify(fs.mkdir)(folderPath, { recursive: true });
+  // Write to file
+  const localPath = `${folderPath}/${uuidv4()}`;
+  await promisify(fs.writeFile)(localPath, Buffer.from(data, 'base64').toString('utf-8'));
 
-    // Write to file
-    const localPath = `${folderPath}/${uuidv4()}`;
-    await promisify(fs.writeFile)(localPath, Buffer.from(data, 'base64').toString('utf-8'));
+  // Create file's MongoDB document
+  const file = {
+    userId, name, type, isPublic, parentId, localPath,
+  };
 
-    // Create file's MongoDB document
-    const file = { userId, name, type, isPublic, parentId, localPath};
+  // Insert to DB
+  await dbClient.insertOne('files', file);
 
-    // Insert to DB
-    await dbClient.insertOne('files', file);
+  // Return response
+  return res.status(201).json({
+    id: file._id, userId, name, type, isPublic, parentId,
+  });
+}
 
-    // Return response
-    return res.status(201).json({ id: file._id, userId, name, type, isPublic, parentId });
-  }
+export async function getShow() {
+  // temporary
+  return null;
 }

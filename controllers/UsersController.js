@@ -1,7 +1,7 @@
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
 import { ObjectId } from 'mongodb';
 import sha1 from 'sha1';
+import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 export async function postNew(req, res) {
   const email = req.body ? req.body.email : null;
@@ -39,7 +39,6 @@ export async function postNew(req, res) {
 }
 
 export async function getMe(req, res) {
-
   // Retrieve token from 'X-Token' header
   const token = req.headers['x-token'];
   if (!token) {

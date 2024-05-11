@@ -1,8 +1,7 @@
 import express from 'express';
 import { getStatus, getStats } from '../controllers/AppController';
-import { getConnect } from '../controllers/AuthController';
+import { getConnect, disconnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
-import { disconnect } from '../controllers/AuthController';
 import { postUpload } from '../controllers/FilesController';
 
 // Create router
