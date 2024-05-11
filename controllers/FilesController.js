@@ -94,7 +94,7 @@ export async function postUpload(req, res) {
   const localPath = `${folderPath}/${uuidv4()}`;
   await promisify(fs.writeFile)(
     localPath,
-    Buffer.from(data, 'base64').toString('utf-8')
+    Buffer.from(data, 'base64').toString('utf-8'),
   );
 
   // Create file's MongoDB document
@@ -201,5 +201,5 @@ export async function getIndex(req, res) {
       },
     ])
     .toArray();
-  res.status(200).json(files);
+  return res.status(200).json(files);
 }
