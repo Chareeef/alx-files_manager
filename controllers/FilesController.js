@@ -142,9 +142,9 @@ export async function getShow(req, res) {
     userId: user._id,
   });
   if (!file) {
-    return response.status(404).json({ error: 'Not found' });
+    return res.status(404).json({ error: 'Not found' });
   }
-  return response.status(200).json(file);
+  return res.status(200).json(file);
 }
 
 export async function getIndex(req, res) {
