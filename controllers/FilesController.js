@@ -29,7 +29,7 @@ export async function postUpload(req, res) {
 
   // The type
   const { type } = req.body;
-  if (!type || !(['folder', 'file', 'image'].includes(type))) {
+  if (!type || !['folder', 'file', 'image'].includes(type)) {
     return res.status(400).json({ error: 'Missing type' });
   }
 
@@ -43,7 +43,9 @@ export async function postUpload(req, res) {
   const parentId = req.body.parentId ? req.body.parentId : 0;
   if (parentId !== 0) {
     // Check if the parent folder exists
-    const parentFolder = await dbClient.findOne('files', { _id: new ObjectId(parentId) });
+    const parentFolder = await dbClient.findOne('files', {
+      _id: new ObjectId(parentId),
+    });
     if (!parentFolder) {
       return res.status(400).json({ error: 'Parent not found' });
     }
@@ -63,7 +65,11 @@ export async function postUpload(req, res) {
   if (type === 'folder') {
     // Create folder's MongoDB document
     const folder = {
-      userId, name, type, isPublic, parentId,
+      userId,
+      name,
+      type,
+      isPublic,
+      parentId,
     };
 
     // Insert to DB
@@ -71,7 +77,12 @@ export async function postUpload(req, res) {
 
     // Return response
     return res.status(201).json({
-      id: folder._id, userId, name, type, isPublic, parentId,
+      id: folder._id,
+      userId,
+      name,
+      type,
+      isPublic,
+      parentId,
     });
   } // Image or file
 
@@ -81,11 +92,19 @@ export async function postUpload(req, res) {
 
   // Write to file
   const localPath = `${folderPath}/${uuidv4()}`;
-  await promisify(fs.writeFile)(localPath, Buffer.from(data, 'base64').toString('utf-8'));
+  await promisify(fs.writeFile)(
+    localPath,
+    Buffer.from(data, 'base64').toString('utf-8')
+  );
 
   // Create file's MongoDB document
   const file = {
-    userId, name, type, isPublic, parentId, localPath,
+    userId,
+    name,
+    type,
+    isPublic,
+    parentId,
+    localPath,
   };
 
   // Insert to DB
@@ -93,11 +112,16 @@ export async function postUpload(req, res) {
 
   // Return response
   return res.status(201).json({
-    id: file._id, userId, name, type, isPublic, parentId,
+    id: file._id,
+    userId,
+    name,
+    type,
+    isPublic,
+    parentId,
   });
 }
 
-export async function getShow() {
+export async function getShow(req, res) {
   // Retrieve token from 'X-Token' header
   const token = req.headers['x-token'];
   if (!token) {
@@ -113,14 +137,66 @@ export async function getShow() {
 
   // /files/:id
   const fileId = req.params.id;
-  const file = await dbClient.findOne('files', { _id: new ObjectId(fileId), userId: user._id });
+  const file = await dbClient.findOne('files', {
+    _id: new ObjectId(fileId),
+    userId: user._id,
+  });
   if (!file) {
     return response.status(404).json({ error: 'Not found' });
   }
   return response.status(200).json(file);
 }
 
-export async function getIndex() {
-  // temporary
-  return null;
+export async function getIndex(req, res) {
+  // Retrieve token from 'X-Token' header
+  const token = req.headers['x-token'];
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Check token
+  const userId = await redisClient.get(`auth_${token}`);
+  const user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // get parentId
+  const { parentId, page } = req.query;
+  const pageNum = page || 0;
+  const filesCollection = dbClient.db.collection('files');
+  let matchQuery;
+
+  if (!parentId) {
+    matchQuery = { userId: user._id };
+  } else {
+    matchQuery = { userId: user._id, parentId: new ObjectId(parentId) };
+  }
+
+  const files = filesCollection
+    .aggregate([
+      { $match: matchQuery },
+      { $sort: { _id: -1 } },
+      { $skip: page * 20 },
+      { $limit: 20 },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          userId: '$userId',
+          name: '$name',
+          type: '$type',
+          isPublic: '$isPublic',
+          parentId: {
+            $cond: {
+              if: { $eq: ['$parentId', '0'] },
+              then: 0,
+              else: '$parentId',
+            },
+          },
+        },
+      },
+    ])
+    .toArray();
+  res.status(200).json(files);
 }
