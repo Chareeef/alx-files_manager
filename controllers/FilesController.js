@@ -123,7 +123,6 @@ export async function postUpload(req, res) {
 
 // Return a file by file._id
 export async function getShow(req, res) {
-
   // Retrieve token from 'X-Token' header
   const token = req.headers['x-token'];
   if (!token) {
@@ -152,7 +151,14 @@ export async function getShow(req, res) {
   }
 
   // Return response
-  return res.status(200).json(file);
+  return res.status(200).json({
+    id: file._id.toString(),
+    userId: file.userId,
+    name: file.name,
+    type: file.type,
+    isPublic: file.isPublic,
+    parentId: file.parentId,
+  });
 }
 
 export async function getIndex(req, res) {
@@ -184,10 +190,10 @@ export async function getIndex(req, res) {
     };
   }
 
+  // Filter files, paginate, and return results
   const files = await filesCollection
     .aggregate([
       { $match: matchQuery },
-      { $sort: { _id: -1 } },
       { $skip: pageNum * 20 },
       { $limit: 20 },
       {
@@ -209,5 +215,6 @@ export async function getIndex(req, res) {
       },
     ])
     .toArray();
+
   return res.status(200).json(files);
 }
