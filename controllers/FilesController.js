@@ -173,7 +173,7 @@ export async function getIndex(req, res) {
     matchQuery = { userId: user._id, parentId: new ObjectId(parentId) };
   }
 
-  const files = filesCollection
+  const files = await filesCollection
     .aggregate([
       { $match: matchQuery },
       { $sort: { _id: -1 } },
