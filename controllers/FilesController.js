@@ -121,7 +121,9 @@ export async function postUpload(req, res) {
   });
 }
 
+// Return a file by file._id
 export async function getShow(req, res) {
+
   // Retrieve token from 'X-Token' header
   const token = req.headers['x-token'];
   if (!token) {
@@ -135,15 +137,21 @@ export async function getShow(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // /files/:id
+  // Retrieve requested id
   const fileId = req.params.id;
+
+  // Search file in DB
   const file = await dbClient.findOne('files', {
     _id: new ObjectId(fileId),
     userId: user._id.toString(),
   });
+
+  // Ensure file's existenc
   if (!file) {
     return res.status(404).json({ error: 'Not found' });
   }
+
+  // Return response
   return res.status(200).json(file);
 }
 
