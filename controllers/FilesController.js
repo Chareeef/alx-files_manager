@@ -43,7 +43,7 @@ export async function postUpload(req, res) {
   const parentId = req.body.parentId ? req.body.parentId : 0;
   if (parentId !== 0) {
     // Check if the parent folder exists
-    const parentFolder = dbClient.findOne('files', {
+    const parentFolder = await dbClient.findOne('files', {
       _id: new ObjectId(parentId),
     });
     if (!parentFolder) {
