@@ -44,22 +44,22 @@ router.post('/files', async (req, res) => {
   await postUpload(req, res);
 });
 
-// GET /files/:id
+// 'GET /files/:id' route
 router.get('/files/:id', async (req, res) => {
   await getShow(req, res);
 });
 
-// GET /files
+// 'GET /files' route
 router.get('/files', async (req, res) => {
   await getIndex(req, res);
 });
 
-// GET /files
+// 'PUT /files/:id/publish' route
 router.put('/files/:id/publish', async (req, res) => {
   await publish(req, res);
 });
 
-// GET /files
+// 'PUT /files/:id/unpublish' route
 router.put('/files/:id/unpublish', async (req, res) => {
   await unpublish(req, res);
 });
