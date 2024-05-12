@@ -14,7 +14,13 @@ export async function postUpload(req, res) {
 
   // Check token
   const userId = await redisClient.get(`auth_${token}`);
-  const user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+
+  let user;
+  try {
+    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -83,7 +89,7 @@ export async function postUpload(req, res) {
 
     // Return response
     return res.status(201).json({
-      id: folder._id,
+      id: folder._id.toString(),
       userId,
       name,
       type,
@@ -120,7 +126,7 @@ export async function postUpload(req, res) {
 
   // Return response
   return res.status(201).json({
-    id: file._id,
+    id: file._id.toString(),
     userId,
     name,
     type,
