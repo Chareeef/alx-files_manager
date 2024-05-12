@@ -2,7 +2,9 @@ import express from 'express';
 import { getStatus, getStats } from '../controllers/AppController';
 import { getConnect, disconnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
-import { postUpload, getShow, getIndex, publish, unpublish } from '../controllers/FilesController';
+import {
+  postUpload, getShow, getIndex, publish, unpublish,
+} from '../controllers/FilesController';
 
 // Create router
 const router = express.Router();

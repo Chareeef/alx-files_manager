@@ -94,7 +94,7 @@ export async function postUpload(req, res) {
   const localPath = `${folderPath}/${uuidv4()}`;
   await promisify(fs.writeFile)(
     localPath,
-    Buffer.from(data, 'base64').toString('utf-8')
+    Buffer.from(data, 'base64').toString('utf-8'),
   );
 
   // Create file's MongoDB document
@@ -276,7 +276,7 @@ export async function publish(req, res) {
       _id: new ObjectId(fileId),
       userId: user._id.toString(),
     },
-    { $set: { isPublic: true } }
+    { $set: { isPublic: true } },
   );
   const updatedFile = await dbClient.findOne('files', {
     _id: new ObjectId(fileId),
@@ -335,7 +335,7 @@ export async function unpublish(req, res) {
       _id: new ObjectId(fileId),
       userId: user._id.toString(),
     },
-    { $set: { isPublic: false } }
+    { $set: { isPublic: false } },
   );
   const updatedFile = await dbClient.findOne('files', {
     _id: new ObjectId(fileId),
