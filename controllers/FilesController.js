@@ -275,12 +275,13 @@ export async function publish(req, res) {
   const fileId = req.params.id;
 
   // Search file in DB
+  let file;
   try {
-    const file = await dbClient.findOne('files', {
+    file = await dbClient.findOne('files', {
       _id: new ObjectId(fileId),
       userId: user._id,
     });
-  } catch(err) {
+  } catch (err) {
     return res.status(404).json({ error: 'Not found' });
   }
 
@@ -338,10 +339,15 @@ export async function unpublish(req, res) {
   const fileId = req.params.id;
 
   // Search file in DB
-  const file = await dbClient.findOne('files', {
-    _id: new ObjectId(fileId),
-    userId: user._id.toString(),
-  });
+  let file;
+  try {
+    file = await dbClient.findOne('files', {
+      _id: new ObjectId(fileId),
+      userId: user._id,
+    });
+  } catch (err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
 
   // Ensure file's existence
   if (!file) {
