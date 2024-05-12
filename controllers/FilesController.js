@@ -151,7 +151,7 @@ export async function getShow(req, res) {
     userId: user._id.toString(),
   });
 
-  // Ensure file's existenc
+  // Ensure file's existence
   if (!file) {
     return res.status(404).json({ error: 'Not found' });
   }
@@ -199,7 +199,7 @@ export async function getIndex(req, res) {
     try {
       matchQuery = {
         userId: user._id.toString(),
-        parentId: new ObjectId(parentId),
+        parentId: parentId.toString(),
       };
     } catch (err) {
       return res.json([]);
