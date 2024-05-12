@@ -40,11 +40,17 @@ export async function postUpload(req, res) {
   }
 
   // The Parent ID (optional)
-  const parentId = req.body.parentId ? req.body.parentId : 0;
+  let parentId;
+  try {
+    parentId = req.body.parentId && req.body.parentId !== '0' ? new ObjectId(req.body.parentId) : 0;
+  } catch (err) {
+    return res.status(400).json({ error: 'Parent not found' });
+  }
+
   if (parentId !== 0) {
     // Check if the parent folder exists
     const parentFolder = await dbClient.findOne('files', {
-      _id: new ObjectId(parentId),
+      _id: parentId,
     });
     if (!parentFolder) {
       return res.status(400).json({ error: 'Parent not found' });
@@ -82,9 +88,11 @@ export async function postUpload(req, res) {
       name,
       type,
       isPublic,
-      parentId,
+      parentId: parentId !== '0' ? parentId.toString() : 0,
     });
-  } // Image or file
+  }
+
+  // Image or file
 
   // Create directory if not exists
   const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
@@ -117,7 +125,7 @@ export async function postUpload(req, res) {
     name,
     type,
     isPublic,
-    parentId,
+    parentId: parentId !== '0' ? parentId.toString() : 0,
   });
 }
 
@@ -187,27 +195,32 @@ export async function getIndex(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // get parentId and page
-  const  page = req.query.page ? Number(req.query.page) : 0;
-
+  // Get parentId
+  let parentId;
   try {
-    const  parentId = req.query.parentId ? new ObjectId(req.query.parentId) : '0';
+    parentId = req.query.parentId && req.query.parentId !== '0' ? new ObjectId(req.query.parentId) : '0';
   } catch (err) {
     return res.json([]);
   }
-  const filesCollection = dbClient.db.collection('files');
-  let matchQuery;
 
-  if (parentId !== '0') {
-    matchQuery = { userId: user._id.toString() };
-  } else {
-    matchQuery = {
-      userId: user._id.toString(),
-      parentId;
-    };
+  // Get page
+  const page = req.query.page ? Number(req.query.page) : 0;
+  if (!(page >= 0)) {
+    return res.json([]);
   }
 
   // Filter files, paginate, and return results
+
+  const filesCollection = dbClient.db.collection('files');
+  const matchQuery = {
+    userId: user._id.toString(),
+  };
+
+  if (parentId !== '0') {
+    matchQuery.parentId = parentId;
+  }
+
+  // Aggregate results
   const files = await filesCollection
     .aggregate([
       { $match: matchQuery },
