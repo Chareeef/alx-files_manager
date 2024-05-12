@@ -131,7 +131,13 @@ export async function getShow(req, res) {
 
   // Check token
   const userId = await redisClient.get(`auth_${token}`);
-  const user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  let user;
+  try {
+    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -170,7 +176,13 @@ export async function getIndex(req, res) {
 
   // Check token
   const userId = await redisClient.get(`auth_${token}`);
-  const user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  let user;
+  try {
+    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -184,10 +196,14 @@ export async function getIndex(req, res) {
   if (!parentId) {
     matchQuery = { userId: user._id.toString() };
   } else {
-    matchQuery = {
-      userId: user._id.toString(),
-      parentId: new ObjectId(parentId),
-    };
+    try {
+      matchQuery = {
+        userId: user._id.toString(),
+        parentId: new ObjectId(parentId),
+      };
+    } catch (err) {
+      return res.json([]);
+    }
   }
 
   // Filter files, paginate, and return results
