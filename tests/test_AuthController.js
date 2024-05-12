@@ -59,4 +59,15 @@ describe('Test AuthController routes', () => {
     expect(res).to.have.status(401);
     expect(res.body).to.eql({ error: 'Unauthorized' });
   });
+
+  it('Test GET /connect with wrong password', async () => {
+
+    const auth64 = Buffer.from('ycok@myorg.com:mlop987').toString('base64');
+    const res = await chai.request(server)
+      .get('/connect')
+      .set('Authorization', `Basic ${auth64}`);
+
+    expect(res).to.have.status(401);
+    expect(res.body).to.eql({ error: 'Unauthorized' });
+  });
 });
