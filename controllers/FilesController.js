@@ -284,7 +284,7 @@ export async function publish(req, res) {
   });
 
   res.status(200).json({
-    fileId,
+    id: fileId,
     userId,
     name: updatedFile.name,
     type: updatedFile.type,
@@ -343,7 +343,7 @@ export async function unpublish(req, res) {
   });
 
   res.status(200).json({
-    fileId,
+    id: fileId,
     userId,
     name: updatedFile.name,
     type: updatedFile.type,
