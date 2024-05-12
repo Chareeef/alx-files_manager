@@ -1,5 +1,6 @@
 import app from '../server';
 import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import waitConnection from './wait_connection.js';
@@ -12,6 +13,7 @@ chai.use(chaiHttp);
 describe('Test AuthController routes', () => {
   
   let server;
+  let userId;
 
   before((done) => {
 
@@ -22,7 +24,8 @@ describe('Test AuthController routes', () => {
       await waitConnection();
 
       // Feed our Test Database (Change DB_DATABASE environmemt var)
-      await dbClient.insertOne('users', { email: 'ycok@myorg.com', password: sha1('mlop789') });
+      const { insertedId } = await dbClient.insertOne('users', { email: 'ycok@myorg.com', password: sha1('mlop789') });
+      userId = insertedId.toString();
 
       done();
     });
@@ -47,6 +50,8 @@ describe('Test AuthController routes', () => {
 
     expect(res).to.have.status(200);
     expect(Object.keys(res.body).includes('token')).to.be.true;
+    const key = `auth_${res.body.token}`;
+    expect(await redisClient.get(key)).to.equal(userId);
   });
 
   it('Test GET /connect with wrong email', async () => {
