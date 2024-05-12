@@ -187,30 +187,31 @@ export async function getIndex(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // get parentId
-  const { parentId, page } = req.query;
-  const pageNum = page || 0;
+  // get parentId and page
+  const  page = req.query.page ? Number(req.query.page) : 0;
+
+  try {
+    const  parentId = req.query.parentId ? new ObjectId(req.query.parentId) : '0';
+  } catch (err) {
+    return res.json([]);
+  }
   const filesCollection = dbClient.db.collection('files');
   let matchQuery;
 
-  if (!parentId) {
+  if (parentId !== '0') {
     matchQuery = { userId: user._id.toString() };
   } else {
-    try {
-      matchQuery = {
-        userId: user._id.toString(),
-        parentId: new ObjectId(parentId.toString()),
-      };
-    } catch (err) {
-      return res.json([]);
-    }
+    matchQuery = {
+      userId: user._id.toString(),
+      parentId;
+    };
   }
 
   // Filter files, paginate, and return results
   const files = await filesCollection
     .aggregate([
       { $match: matchQuery },
-      { $skip: pageNum * 20 },
+      { $skip: page * 20 },
       { $limit: 20 },
       {
         $project: {
