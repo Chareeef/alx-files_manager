@@ -5,6 +5,7 @@ import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 export async function getConnect(req, res) {
+
   // Retrieve 'Authorization' Basic Auth string
   const authBase64 = req.headers.authorization.slice(6);
   if (!authBase64) {
