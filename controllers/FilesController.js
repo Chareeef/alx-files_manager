@@ -163,7 +163,7 @@ export async function getShow(req, res) {
     name: file.name,
     type: file.type,
     isPublic: file.isPublic,
-    parentId: file.parentId,
+    parentId: file.parentId.toString(),
   });
 }
 
@@ -199,7 +199,7 @@ export async function getIndex(req, res) {
     try {
       matchQuery = {
         userId: user._id.toString(),
-        parentId: parentId.toString(),
+        parentId: new ObjectId(parentId.toString()),
       };
     } catch (err) {
       return res.json([]);
