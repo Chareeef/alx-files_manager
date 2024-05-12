@@ -71,7 +71,7 @@ export async function postUpload(req, res) {
   if (type === 'folder') {
     // Create folder's MongoDB document
     const folder = {
-      userId,
+      userId: user._id,
       name,
       type,
       isPublic,
@@ -90,43 +90,44 @@ export async function postUpload(req, res) {
       isPublic,
       parentId: parentId !== '0' ? parentId.toString() : 0,
     });
+  } else {
+
+    // Image or file
+
+    // Create directory if not exists
+    const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
+    await promisify(fs.mkdir)(folderPath, { recursive: true });
+
+    // Write to file
+    const localPath = `${folderPath}/${uuidv4()}`;
+    await promisify(fs.writeFile)(
+      localPath,
+      Buffer.from(data, 'base64').toString('utf-8'),
+    );
+
+    // Create file's MongoDB document
+    const file = {
+      userId: user._id,
+      name,
+      type,
+      isPublic,
+      parentId,
+      localPath,
+    };
+
+    // Insert to DB
+    await dbClient.insertOne('files', file);
+
+    // Return response
+    return res.status(201).json({
+      id: file._id,
+      userId,
+      name,
+      type,
+      isPublic,
+      parentId: parentId !== '0' ? parentId.toString() : 0,
+    });
   }
-
-  // Image or file
-
-  // Create directory if not exists
-  const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-  await promisify(fs.mkdir)(folderPath, { recursive: true });
-
-  // Write to file
-  const localPath = `${folderPath}/${uuidv4()}`;
-  await promisify(fs.writeFile)(
-    localPath,
-    Buffer.from(data, 'base64').toString('utf-8'),
-  );
-
-  // Create file's MongoDB document
-  const file = {
-    userId,
-    name,
-    type,
-    isPublic,
-    parentId,
-    localPath,
-  };
-
-  // Insert to DB
-  await dbClient.insertOne('files', file);
-
-  // Return response
-  return res.status(201).json({
-    id: file._id,
-    userId,
-    name,
-    type,
-    isPublic,
-    parentId: parentId !== '0' ? parentId.toString() : 0,
-  });
 }
 
 // Return a file by file._id
