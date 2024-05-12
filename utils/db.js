@@ -40,17 +40,22 @@ class DBClient {
     return this.db.collection(coll).insertOne(doc);
   }
 
-  // Insert documents into a collection
-  async insert(coll, ...docs) {
-    this.db.collection(coll).insertMany(docs);
+  // Insert many documents into a collection
+  async insertMany(coll, ...docs) {
+    return this.db.collection(coll).insertMany(docs);
   }
 
-  // Find a document in a collection
+  // Find a document inside a collection
   async findOne(coll, filter) {
     return this.db.collection(coll).findOne(filter);
   }
+
+  // Delete many documents from a collection
+  async deleteMany(coll, filter) {
+    return this.db.collection(coll).deleteMany(filter);
+  }
 }
+
 // Export a DBClient instance
 const dbClient = new DBClient();
-
 export default dbClient;
