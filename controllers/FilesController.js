@@ -296,26 +296,29 @@ export async function publish(req, res) {
     return res.status(404).json({ error: 'Not found' });
   }
 
+  // Make it public
   dbClient.db.collection('files').updateOne(
     {
       _id: new ObjectId(fileId),
-      userId: user._id.toString(),
+      userId: user._id,
     },
     { $set: { isPublic: true } },
   );
+
+  // Return updated file
   const updatedFile = await dbClient.findOne('files', {
     _id: new ObjectId(fileId),
-    userId: user._id.toString(),
+    userId: user._id,
   });
 
   return res.status(200).json({
     id: fileId,
-    userId,
+    userId: user._id.toString(),
     name: updatedFile.name,
     type: updatedFile.type,
-    isPublic: true,
+    isPublic: updatedFile.isPublic,
     parentId:
-      updatedFile.parentId === '0'.toString() ? 0 : updatedFile.parentId.toString(),
+      updatedFile.parentId === '0' ? 0 : updatedFile.parentId.toString(),
   });
 }
 
@@ -360,25 +363,28 @@ export async function unpublish(req, res) {
     return res.status(404).json({ error: 'Not found' });
   }
 
+  // Make it private
   dbClient.db.collection('files').updateOne(
     {
       _id: new ObjectId(fileId),
-      userId: user._id.toString(),
+      userId: user._id,
     },
     { $set: { isPublic: false } },
   );
+
+  // Return updated file
   const updatedFile = await dbClient.findOne('files', {
     _id: new ObjectId(fileId),
-    userId: user._id.toString(),
+    userId: user._id,
   });
 
   return res.status(200).json({
     id: fileId,
-    userId,
+    userId: user._id.toString(),
     name: updatedFile.name,
     type: updatedFile.type,
-    isPublic: false,
+    isPublic: updatedFile.isPublic,
     parentId:
-      updatedFile.parentId === '0'.toString() ? 0 : updatedFile.parentId.toString(),
+      updatedFile.parentId === '0' ? 0 : updatedFile.parentId.toString(),
   });
 }
