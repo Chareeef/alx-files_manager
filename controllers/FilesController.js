@@ -290,7 +290,7 @@ export async function publish(req, res) {
     type: updatedFile.type,
     isPublic: true,
     parentId:
-      updatedFile.parentId === '0' ? 0 : updatedFile.parentId.toString(),
+      updatedFile.parentId === '0'.toString() ? 0 : updatedFile.parentId.toString(),
   });
 }
 
@@ -349,6 +349,6 @@ export async function unpublish(req, res) {
     type: updatedFile.type,
     isPublic: false,
     parentId:
-      updatedFile.parentId === '0' ? 0 : updatedFile.parentId.toString(),
+      updatedFile.parentId === '0'.toString() ? 0 : updatedFile.parentId.toString(),
   });
 }
