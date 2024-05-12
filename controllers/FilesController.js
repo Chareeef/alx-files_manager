@@ -207,7 +207,7 @@ export async function getIndex(req, res) {
   }
 
   // Filter files, paginate, and return results
-  const files = await filesCollection
+  const files =  filesCollection
     .aggregate([
       { $match: matchQuery },
       { $skip: pageNum * 20 },
