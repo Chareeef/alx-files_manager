@@ -94,7 +94,7 @@ export async function postUpload(req, res) {
   const localPath = `${folderPath}/${uuidv4()}`;
   await promisify(fs.writeFile)(
     localPath,
-    Buffer.from(data, 'base64').toString('utf-8'),
+    Buffer.from(data, 'base64').toString('utf-8')
   );
 
   // Create file's MongoDB document
@@ -207,7 +207,7 @@ export async function getIndex(req, res) {
   }
 
   // Filter files, paginate, and return results
-  const files =  await (await filesCollection
+  const files = await filesCollection
     .aggregate([
       { $match: matchQuery },
       { $skip: pageNum * 20 },
@@ -229,7 +229,7 @@ export async function getIndex(req, res) {
           },
         },
       },
-    ]))
+    ])
     .toArray();
 
   return res.status(200).json(files);
