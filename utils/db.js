@@ -41,7 +41,7 @@ class DBClient {
   }
 
   // Insert many documents into a collection
-  async insertMany(coll, ...docs) {
+  async insertMany(coll, docs) {
     return this.db.collection(coll).insertMany(docs);
   }
 
