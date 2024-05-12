@@ -283,7 +283,7 @@ export async function publish(req, res) {
     userId: user._id.toString(),
   });
 
-  res.status(200).json({
+  return res.status(200).json({
     id: fileId,
     userId,
     name: updatedFile.name,
@@ -342,7 +342,7 @@ export async function unpublish(req, res) {
     userId: user._id.toString(),
   });
 
-  res.status(200).json({
+  return res.status(200).json({
     id: fileId,
     userId,
     name: updatedFile.name,
