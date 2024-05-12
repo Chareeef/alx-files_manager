@@ -49,7 +49,9 @@ describe('Test AuthController routes', () => {
       .set('Authorization', `Basic ${auth64}`);
 
     expect(res).to.have.status(200);
+
     expect(Object.keys(res.body).includes('token')).to.be.true;
+
     const key = `auth_${res.body.token}`;
     expect(await redisClient.get(key)).to.equal(userId);
   });
@@ -74,5 +76,29 @@ describe('Test AuthController routes', () => {
 
     expect(res).to.have.status(401);
     expect(res.body).to.eql({ error: 'Unauthorized' });
+  });
+
+  it('Test GET /disconnect', async () => {
+
+    // Create token by connectin
+    const auth64 = Buffer.from('ycok@myorg.com:mlop789').toString('base64');
+    const resConnect = await chai.request(server)
+      .get('/connect')
+      .set('Authorization', `Basic ${auth64}`);
+
+    // Verify that a token was stored
+    expect(resConnect).to.have.status(200);
+    const token = resConnect.body.token;
+    const key = `auth_${token}`;
+    expect(await redisClient.get(key)).to.equal(userId);
+
+    // Disconnect
+    const resDisconnect = await chai.request(server)
+      .get('/disconnect')
+      .set('X-Token', `${token}`);
+
+    // Verify token was deleted
+    expect(resDisconnect).to.have.status(204);
+    expect(await redisClient.get(key)).to.equal(null);
   });
 });
