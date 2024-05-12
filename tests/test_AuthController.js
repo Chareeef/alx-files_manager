@@ -38,7 +38,7 @@ describe('Test AuthController routes', () => {
     server.close();
   });
 
-  it('GET /connect with correct credentials', async () => {
+  it('Test GET /connect with correct credentials', async () => {
 
     const auth64 = Buffer.from('ycok@myorg.com:mlop789').toString('base64');
     const res = await chai.request(server)
@@ -47,5 +47,16 @@ describe('Test AuthController routes', () => {
 
     expect(res).to.have.status(200);
     expect(Object.keys(res.body).includes('token')).to.be.true;
+  });
+
+  it('Test GET /connect with wrong email', async () => {
+
+    const auth64 = Buffer.from('okyc@orgocop.com:mlop789').toString('base64');
+    const res = await chai.request(server)
+      .get('/connect')
+      .set('Authorization', `Basic ${auth64}`);
+
+    expect(res).to.have.status(401);
+    expect(res.body).to.eql({ error: 'Unauthorized' });
   });
 });
