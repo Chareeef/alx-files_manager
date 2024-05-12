@@ -42,7 +42,7 @@ export async function postUpload(req, res) {
   // The Parent ID (optional)
   let parentId;
   try {
-    parentId = req.body.parentId && req.body.parentId !== '0' ? new ObjectId(req.body.parentId) : 0;
+    parentId = req.body.parentId && req.body.parentId !== '0' ? new ObjectId(req.body.parentId) : '0';
   } catch (err) {
     return res.status(400).json({ error: 'Parent not found' });
   }
@@ -90,44 +90,43 @@ export async function postUpload(req, res) {
       isPublic,
       parentId: parentId !== '0' ? parentId.toString() : 0,
     });
-  } else {
-
-    // Image or file
-
-    // Create directory if not exists
-    const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-    await promisify(fs.mkdir)(folderPath, { recursive: true });
-
-    // Write to file
-    const localPath = `${folderPath}/${uuidv4()}`;
-    await promisify(fs.writeFile)(
-      localPath,
-      Buffer.from(data, 'base64').toString('utf-8'),
-    );
-
-    // Create file's MongoDB document
-    const file = {
-      userId: user._id,
-      name,
-      type,
-      isPublic,
-      parentId,
-      localPath,
-    };
-
-    // Insert to DB
-    await dbClient.insertOne('files', file);
-
-    // Return response
-    return res.status(201).json({
-      id: file._id,
-      userId,
-      name,
-      type,
-      isPublic,
-      parentId: parentId !== '0' ? parentId.toString() : 0,
-    });
   }
+
+  // Image or file
+
+  // Create directory if not exists
+  const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
+  await promisify(fs.mkdir)(folderPath, { recursive: true });
+
+  // Write to file
+  const localPath = `${folderPath}/${uuidv4()}`;
+  await promisify(fs.writeFile)(
+    localPath,
+    Buffer.from(data, 'base64').toString('utf-8'),
+  );
+
+  // Create file's MongoDB document
+  const file = {
+    userId: user._id,
+    name,
+    type,
+    isPublic,
+    parentId,
+    localPath,
+  };
+
+  // Insert to DB
+  await dbClient.insertOne('files', file);
+
+  // Return response
+  return res.status(201).json({
+    id: file._id,
+    userId,
+    name,
+    type,
+    isPublic,
+    parentId: parentId !== '0' ? parentId.toString() : 0,
+  });
 }
 
 // Return a file by file._id
@@ -214,7 +213,7 @@ export async function getIndex(req, res) {
 
   const filesCollection = dbClient.db.collection('files');
   const matchQuery = {
-    userId: user._id.toString(),
+    userId: user._id,
   };
 
   if (parentId !== '0') {
@@ -276,10 +275,14 @@ export async function publish(req, res) {
   const fileId = req.params.id;
 
   // Search file in DB
-  const file = await dbClient.findOne('files', {
-    _id: new ObjectId(fileId),
-    userId: user._id.toString(),
-  });
+  try {
+    const file = await dbClient.findOne('files', {
+      _id: new ObjectId(fileId),
+      userId: user._id,
+    });
+  } catch(err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
 
   // Ensure file's existence
   if (!file) {
