@@ -80,7 +80,7 @@ describe('Test AuthController routes', () => {
 
   it('Test GET /disconnect', async () => {
 
-    // Create token by connectin
+    // Create token by making a connection
     const auth64 = Buffer.from('ycok@myorg.com:mlop789').toString('base64');
     const resConnect = await chai.request(server)
       .get('/connect')
