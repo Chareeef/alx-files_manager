@@ -346,3 +346,47 @@ export async function unpublish(req, res) {
       updatedFile.parentId === '0' ? 0 : updatedFile.parentId.toString(),
   });
 }
+
+// GET /files/:id/data
+export async function getFile(req, res) {
+  // Retrieve requested id
+  const fileId = req.params.id;
+
+  // Search file in DB
+  let file;
+  try {
+    file = await dbClient.findOne('files', {
+      _id: new ObjectId(fileId),
+    });
+  } catch (err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  // Ensure file's existence
+  if (!file) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  // If the file is private, ensure the user is authenticated and owns it
+  if (!file.isPublic) {
+    const user = await getUser(req);
+    if (!user || user._id.toString() !== file.userId.toString()) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+  }
+
+  // Return an error if it is a folder
+  if (file.type === 'folder') {
+    return res.status(400).json({ error: 'A folder doesn\'t have content' });
+  }
+
+  // Read file
+  const read = promisify(fs.readFile);
+  try {
+    const data = await readFile(file.localPath);
+    // Send data with correct MIME-type
+    return res.end(data);
+  } catch (err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+}

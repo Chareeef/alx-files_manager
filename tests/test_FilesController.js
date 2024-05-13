@@ -118,7 +118,7 @@ describe('test FilesController routes', () => {
 
     it('Test with wrong file id', async () => {
       const res = await chai.request(server)
-        .get(`files/45688876557/data`)
+        .get(`/files/45688876557/data`)
 
       expect(res).to.have.status(404);
       expect(res.body).to.eql({ error: 'Not found' });
@@ -126,7 +126,7 @@ describe('test FilesController routes', () => {
 
     it('Test getting private file without authentication', async () => {
       const res = await chai.request(server)
-        .get(`files/${privateFileId}/data`);
+        .get(`/files/${privateFileId}/data`);
 
       expect(res).to.have.status(404);
       expect(res.body).to.eql({ error: 'Not found' });
@@ -134,7 +134,7 @@ describe('test FilesController routes', () => {
 
     it('Test getting private file with wrong authentication', async () => {
       const res = await chai.request(server)
-        .get(`files/${privateFileId}/data`)
+        .get(`/files/${privateFileId}/data`)
         .set('X-Token', `${token2}`)
 
       expect(res).to.have.status(404);
@@ -143,7 +143,7 @@ describe('test FilesController routes', () => {
 
     it('Test getting private folder without authentication', async () => {
       const res = await chai.request(server)
-        .get(`files/${privateFolderId}/data`);
+        .get(`/files/${privateFolderId}/data`);
 
       expect(res).to.have.status(404);
       expect(res.body).to.eql({ error: 'Not found' });
@@ -151,7 +151,7 @@ describe('test FilesController routes', () => {
 
     it('Test getting private folder with wrong authentication', async () => {
       const res = await chai.request(server)
-        .get(`files/${privateFolderId}/data`)
+        .get(`/files/${privateFolderId}/data`)
         .set('X-Token', `${token2}`);
 
       expect(res).to.have.status(404);
@@ -160,7 +160,7 @@ describe('test FilesController routes', () => {
 
     it('Test getting private folder', async () => {
       const res = await chai.request(server)
-        .get(`files/${privateFolderId}/data`)
+        .get(`/files/${privateFolderId}/data`)
         .set('X-Token', `${token}`);
 
       expect(res).to.have.status(400);
@@ -169,7 +169,7 @@ describe('test FilesController routes', () => {
 
     it('Test getting public folder', async () => {
       const res = await chai.request(server)
-        .get(`files/${folderId}/data`)
+        .get(`/files/${folderId}/data`)
         .set('X-Token', `${token}`);
 
       expect(res).to.have.status(400);
@@ -185,12 +185,12 @@ describe('test FilesController routes', () => {
         .insertedId;
 
       const res = await chai.request(server)
-        .get(`files/${inexistentFileId}/data`);
+        .get(`/files/${inexistentFileId}/data`);
 
       expect(res).to.have.status(404);
       expect(res.body).to.eql({ error: 'Not found' });
 
-      await dbClient.deleteOne({ _id: inexistentFileId });
+      await dbClient.deleteOne('files', { _id: inexistentFileId });
     });
 
     it('Test getting inexistent image on disk', async () => {
@@ -202,12 +202,12 @@ describe('test FilesController routes', () => {
         .insertedId;
 
       const res = await chai.request(server)
-        .get(`files/${inexistentImageId}/data`);
+        .get(`/files/${inexistentImageId}/data`);
 
       expect(res).to.have.status(404);
       expect(res.body).to.eql({ error: 'Not found' });
 
-      await dbClient.deleteOne({ _id: inexistentImageId });
+      await dbClient.deleteOne('files', { _id: inexistentImageId });
     });
   });
 });
