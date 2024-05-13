@@ -230,6 +230,112 @@ describe('test FilesController routes', () => {
 
       await dbClient.deleteOne('files', { _id: fileId });
     });
+
+    it('Test creating file with specifying parentId and isPublic', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          name: 'msg.txt', type: 'file',
+          data: Buffer.from('Heeey you!').toString('base64'),
+          parentId: folderId.toString(), isPublic: true,
+        });
+
+      expect(res).to.have.status(201);
+
+      const fileId = new ObjectId(res.body.id);
+      expect(res.body).to.eql(
+        {
+          id: fileId.toString(), userId: userId.toString(),  name: 'msg.txt',
+          type: 'file', isPublic: true, parentId: folderId.toString(),
+        }
+      );
+
+      const file = await dbClient.findOne('files', { _id: fileId });
+
+      // Check file's Mongo document
+      expect(file.localPath.startsWith(process.env.FOLDER_PATH || '/tmp/files_manager'))
+        .to.be.true;
+
+      expect(file).to.eql(
+        {
+          _id: fileId, userId: userId,  name: 'msg.txt',
+          type: 'file', isPublic: true, parentId: folderId, localPath: file.localPath,
+        }
+      );
+
+      // Check file on disk
+      const data = await promisify(fs.readFile)(file.localPath);
+      expect(data.toString()).to.equal('Heeey you!');
+
+      await dbClient.deleteOne('files', { _id: fileId });
+    });
+
+    it('Test creating folder without specifying parentId nor isPublic', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          name: 'docs', type: 'folder',
+        });
+
+      expect(res).to.have.status(201);
+
+      const folderId = new ObjectId(res.body.id);
+      expect(res.body).to.eql(
+        {
+          id: folderId.toString(), userId: userId.toString(),  name: 'docs',
+          type: 'folder', isPublic: false, parentId: 0,
+        }
+      );
+
+      const folder = await dbClient.findOne('files', { _id: folderId });
+
+      // Check folder's Mongo document
+      expect(folder).to.eql(
+        {
+          _id: folderId, userId: userId,  name: 'docs',
+          type: 'folder', isPublic: false, parentId: '0',
+        }
+      );
+
+      await dbClient.deleteOne('files', { _id: folderId });
+    });
+
+    it('Test creating folder with specifying parentId and isPublic', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          name: 'docs', type: 'folder',
+          parentId: folderId.toString(), isPublic: true,
+        });
+
+      expect(res).to.have.status(201);
+
+      const newFolderId = new ObjectId(res.body.id);
+      expect(res.body).to.eql(
+        {
+          id: newFolderId.toString(), userId: userId.toString(),  name: 'docs',
+          type: 'folder', isPublic: true, parentId: folderId.toString(),
+        }
+      );
+
+      const folder = await dbClient.findOne('files', { _id: newFolderId });
+
+      // Check folder's Mongo document
+      expect(folder).to.eql(
+        {
+          _id: newFolderId, userId: userId,  name: 'docs',
+          type: 'folder', isPublic: true, parentId: folderId,
+        }
+      );
+
+      await dbClient.deleteOne('files', { _id: newFolderId });
+    });
   });
 
   describe('Test GET /files/:id/data', async () => {
