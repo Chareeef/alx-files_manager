@@ -1,25 +1,21 @@
+import chai from 'chai';
+import chaiHttp from 'chai-http';
+import sha1 from 'sha1';
 import app from '../server';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
-import chai from 'chai';
-import chaiHttp from 'chai-http';
 import waitConnection from './wait_connection.js';
-import sha1 from 'sha1';
 
-const expect = chai.expect;
+const { expect } = chai;
 chai.use(chaiHttp);
 
-
-describe('Test AuthController routes', () => {
-  
+describe('test AuthController routes', () => {
   let server;
   let userId;
 
   before((done) => {
-
     // Start listening
     server = app.listen(3000, async () => {
-
       // Wait for connection
       await waitConnection();
 
@@ -29,11 +25,9 @@ describe('Test AuthController routes', () => {
 
       done();
     });
-
   });
 
   after(async () => {
-
     // Clear database
     await dbClient.deleteMany('users', {});
 
@@ -41,8 +35,7 @@ describe('Test AuthController routes', () => {
     server.close();
   });
 
-  it('Test GET /connect with correct credentials', async () => {
-
+  it('test GET /connect with correct credentials', async () => {
     const auth64 = Buffer.from('ycok@myorg.com:mlop789').toString('base64');
     const res = await chai.request(server)
       .get('/connect')
@@ -56,8 +49,7 @@ describe('Test AuthController routes', () => {
     expect(await redisClient.get(key)).to.equal(userId);
   });
 
-  it('Test GET /connect with wrong email', async () => {
-
+  it('test GET /connect with wrong email', async () => {
     const auth64 = Buffer.from('okyc@orgocop.com:mlop789').toString('base64');
     const res = await chai.request(server)
       .get('/connect')
@@ -67,8 +59,7 @@ describe('Test AuthController routes', () => {
     expect(res.body).to.eql({ error: 'Unauthorized' });
   });
 
-  it('Test GET /connect with wrong password', async () => {
-
+  it('test GET /connect with wrong password', async () => {
     const auth64 = Buffer.from('ycok@myorg.com:mlop987').toString('base64');
     const res = await chai.request(server)
       .get('/connect')
@@ -78,8 +69,7 @@ describe('Test AuthController routes', () => {
     expect(res.body).to.eql({ error: 'Unauthorized' });
   });
 
-  it('Test GET /disconnect', async () => {
-
+  it('test GET /disconnect', async () => {
     // Create token by making a connection
     const auth64 = Buffer.from('ycok@myorg.com:mlop789').toString('base64');
     const resConnect = await chai.request(server)
@@ -88,7 +78,7 @@ describe('Test AuthController routes', () => {
 
     // Verify that a token was stored
     expect(resConnect).to.have.status(200);
-    const token = resConnect.body.token;
+    const { token } = resConnect.body;
     const key = `auth_${token}`;
     expect(await redisClient.get(key)).to.equal(userId);
 

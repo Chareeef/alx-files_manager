@@ -5,22 +5,34 @@ import { v4 as uuidv4 } from 'uuid';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
-export async function postUpload(req, res) {
+async function getUser(req) {
   // Retrieve token from 'X-Token' header
   const token = req.headers['x-token'];
   if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return null;
   }
 
   // Check token
-  const userId = await redisClient.get(`auth_${token}`);
-
   let user;
   try {
+    const userId = await redisClient.get(`auth_${token}`);
     user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
   } catch (err) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return null;
   }
+
+  // If the user doesn't exist, return null
+  if (!user) {
+    return null;
+  }
+
+  // Return the user
+  return user;
+}
+
+export async function postUpload(req, res) {
+  // Check if authorized
+  const user = await getUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -90,7 +102,7 @@ export async function postUpload(req, res) {
     // Return response
     return res.status(201).json({
       id: folder._id.toString(),
-      userId,
+      user: user._id.toString(),
       name,
       type,
       isPublic,
@@ -127,7 +139,7 @@ export async function postUpload(req, res) {
   // Return response
   return res.status(201).json({
     id: file._id.toString(),
-    userId,
+    user: user._id.toString(),
     name,
     type,
     isPublic,
@@ -135,34 +147,21 @@ export async function postUpload(req, res) {
   });
 }
 
-// Return a file by file._id
+// Return a file by id
 export async function getShow(req, res) {
-  // Retrieve token from 'X-Token' header
-  const token = req.headers['x-token'];
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Check token
-  const userId = await redisClient.get(`auth_${token}`);
-  let user;
-  try {
-    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
-  } catch (err) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
+  // Check if authorized
+  const user = await getUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // Retrieve requested id
+  // Retrieve requested file id
   const fileId = req.params.id;
 
   // Search file in DB
   const file = await dbClient.findOne('files', {
     _id: new ObjectId(fileId),
-    userId: user._id.toString(),
+    userId: user._id,
   });
 
   // Ensure file's existence
@@ -173,7 +172,7 @@ export async function getShow(req, res) {
   // Return response
   return res.status(200).json({
     id: file._id.toString(),
-    userId: file.userId,
+    userId: user._id.toString(),
     name: file.name,
     type: file.type,
     isPublic: file.isPublic,
@@ -181,22 +180,10 @@ export async function getShow(req, res) {
   });
 }
 
+// Retrieve and filter files
 export async function getIndex(req, res) {
-  // Retrieve token from 'X-Token' header
-  const token = req.headers['x-token'];
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Check token
-  const userId = await redisClient.get(`auth_${token}`);
-  let user;
-  try {
-    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
-  } catch (err) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
+  // Check if authorized
+  const user = await getUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -216,7 +203,6 @@ export async function getIndex(req, res) {
   }
 
   // Filter files, paginate, and return results
-
   const filesCollection = dbClient.db.collection('files');
   const matchQuery = {
     userId: user._id,
@@ -255,24 +241,10 @@ export async function getIndex(req, res) {
   return res.status(200).json(files);
 }
 
+// PUT /files/:id/publish
 export async function publish(req, res) {
-  // PUT /files/:id/publish
-
-  // Retrieve token from 'X-Token' header
-  const token = req.headers['x-token'];
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Check token
-  const userId = await redisClient.get(`auth_${token}`);
-  let user;
-  try {
-    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
-  } catch (err) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
+  // Check if authorized
+  const user = await getUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -322,24 +294,10 @@ export async function publish(req, res) {
   });
 }
 
+// PUT /files/:id/unpublish
 export async function unpublish(req, res) {
-  // PUT /files/:id/unpublish
-
-  // Retrieve token from 'X-Token' header
-  const token = req.headers['x-token'];
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Check token
-  const userId = await redisClient.get(`auth_${token}`);
-  let user;
-  try {
-    user = await dbClient.findOne('users', { _id: new ObjectId(userId) });
-  } catch (err) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
+  // Check if authorized
+  const user = await getUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

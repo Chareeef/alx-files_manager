@@ -4,8 +4,8 @@
   "description": "Simple platform to upload and view files",
   "main": "index.js",
   "scripts": {
-    "check-lint": "./node_modules/.bin/eslint *.js [^n]*/*.js",
-    "lint": "./node_modules/.bin/eslint --fix *.js [^n]*/*.js",
+    "check-lint": "./node_modules/.bin/eslint *.js [^tn]*/*.js",
+    "lint": "./node_modules/.bin/eslint --fix *.js [^tn]*/*.js",
     "start-server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js",
     "start-worker": "nodemon --exec babel-node --presets @babel/preset-env ./worker.js",
     "dev": "nodemon --exec babel-node --presets @babel/preset-env",
