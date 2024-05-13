@@ -66,7 +66,7 @@ export async function postUpload(req, res) {
     return res.status(400).json({ error: 'Parent not found' });
   }
 
-  if (parentId !== 0) {
+  if (parentId !== '0') {
     // Check if the parent folder exists
     const parentFolder = await dbClient.findOne('files', {
       _id: parentId,
@@ -82,7 +82,7 @@ export async function postUpload(req, res) {
   }
 
   // Is it public? (optional)
-  const isPublic = req.body.isPublic ? req.body.isPublic : false;
+  const isPublic = req.body.isPublic === true;
 
   // Let's upload
 
@@ -98,7 +98,8 @@ export async function postUpload(req, res) {
     };
 
     // Insert to DB
-    await dbClient.insertOne('files', folder);
+    const { insertedId } = await dbClient.insertOne('files', folder);
+    folder._id = insertedId;
 
     // Return response
     return res.status(201).json({
@@ -135,7 +136,8 @@ export async function postUpload(req, res) {
   };
 
   // Insert to DB
-  await dbClient.insertOne('files', file);
+  const { insertedId } = await dbClient.insertOne('files', file);
+  file._id = insertedId;
 
   // Return response
   return res.status(201).json({
@@ -160,10 +162,15 @@ export async function getShow(req, res) {
   const fileId = req.params.id;
 
   // Search file in DB
-  const file = await dbClient.findOne('files', {
-    _id: new ObjectId(fileId),
-    userId: user._id,
-  });
+  let file;
+  try {
+    file = await dbClient.findOne('files', {
+      _id: new ObjectId(fileId),
+      userId: user._id,
+    });
+  } catch (err) {
+    return res.status(404).json({ error: 'Not found' });
+  }
 
   // Ensure file's existence
   if (!file) {
