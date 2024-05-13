@@ -104,7 +104,7 @@ export async function postUpload(req, res) {
     // Return response
     return res.status(201).json({
       id: folder._id.toString(),
-      user: user._id.toString(),
+      userId: user._id.toString(),
       name,
       type,
       isPublic,
@@ -142,7 +142,7 @@ export async function postUpload(req, res) {
   // Return response
   return res.status(201).json({
     id: file._id.toString(),
-    user: user._id.toString(),
+    userId: user._id.toString(),
     name,
     type,
     isPublic,

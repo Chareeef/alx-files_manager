@@ -6,6 +6,7 @@ import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
 import app from '../server';
 import dbClient from '../utils/db';
+import { ObjectId } from 'mongodb';
 import redisClient from '../utils/redis';
 import waitConnection from './wait_connection.js';
 
@@ -60,7 +61,7 @@ describe('test FilesController routes', () => {
 
       // Create public image owned by th first user
       imagePath = `${dirPath}/${uuidv4()}`;
-      imageData = Buffer.from('^hmkkht*^$#');
+      imageData = Buffer.from('^miaou*^_^$#');
       await promisify(fs.writeFile)(imagePath, imageData);
       imageId = (await dbClient.insertOne('files',
         { userId, name: 'cat.jpg', type: 'image', isPublic: true, parentId: '0', localPath: imagePath })).insertedId;
@@ -188,6 +189,46 @@ describe('test FilesController routes', () => {
 
       expect(res).to.have.status(400);
       expect(res.body).to.eql({ error: 'Parent is not a folder' });
+    });
+
+    it('Test creating file without specifying parentId nor isPublic', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          name: 'msg.txt', type: 'file',
+          data: Buffer.from('Heeey you!').toString('base64'),
+        });
+
+      expect(res).to.have.status(201);
+
+      const fileId = new ObjectId(res.body.id);
+      expect(res.body).to.eql(
+        {
+          id: fileId.toString(), userId: userId.toString(),  name: 'msg.txt',
+          type: 'file', isPublic: false, parentId: 0,
+        }
+      );
+
+      const file = await dbClient.findOne('files', { _id: fileId });
+
+      // Check file's Mongo document
+      expect(file.localPath.startsWith(process.env.FOLDER_PATH || '/tmp/files_manager'))
+        .to.be.true;
+
+      expect(file).to.eql(
+        {
+          _id: fileId, userId: userId,  name: 'msg.txt',
+          type: 'file', isPublic: false, parentId: '0', localPath: file.localPath,
+        }
+      );
+
+      // Check file on disk
+      const data = await promisify(fs.readFile)(file.localPath);
+      expect(data.toString()).to.equal('Heeey you!');
+
+      await dbClient.deleteOne('files', { _id: fileId });
     });
   });
 
