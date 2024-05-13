@@ -184,7 +184,8 @@ export async function getShow(req, res) {
     name: file.name,
     type: file.type,
     isPublic: file.isPublic,
-    parentId: file.parentId.toString(),
+    parentId:
+      file.parentId === '0' ? 0 : file.parentId.toString(),
   });
 }
 
