@@ -2,6 +2,7 @@ import fs from 'fs';
 import { ObjectId } from 'mongodb';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
+import mime from 'mime-types';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
@@ -381,11 +382,14 @@ export async function getFile(req, res) {
   }
 
   // Read file
-  const read = promisify(fs.readFile);
+  const readFile = promisify(fs.readFile);
   try {
     const data = await readFile(file.localPath);
+
     // Send data with correct MIME-type
-    return res.end(data);
+    return res
+      .set('Content-Type', mime.lookup(file.name))
+      .send(data);
   } catch (err) {
     return res.status(404).json({ error: 'Not found' });
   }

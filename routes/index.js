@@ -3,7 +3,7 @@ import { getStatus, getStats } from '../controllers/AppController';
 import { getConnect, disconnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
 import {
-  postUpload, getShow, getIndex, publish, unpublish, getFile
+  postUpload, getShow, getIndex, publish, unpublish, getFile,
 } from '../controllers/FilesController';
 
 // Create router

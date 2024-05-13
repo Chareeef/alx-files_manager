@@ -15,18 +15,11 @@ chai.use(chaiHttp);
 describe('test FilesController routes', () => {
 
   let server;
-  let userId;
-  let userId2
+  let userId, userId2;
   let folderId, privateFolderId;
-  let fileId;
-  let filePath;
-  let fileData;
-  let privateFileId;
-  let privateFilePath;
-  let privateFileData;
-  let imageId;
-  let imagePath;
-  let imageData;
+  let fileId, filePath, fileData;
+  let privateFileId, privateFilePath, privateFileData;
+  let imageId, imagePath, imageData;
   let token, token2;
 
   before((done) => {
@@ -53,24 +46,24 @@ describe('test FilesController routes', () => {
 
       // Create public file owned by the first user
       filePath = `${dirPath}/${uuidv4()}`;
-      fileData = 'You are amazing!';
-      await promisify(fs.writeFile)(filePath, fileData);
+      fileData = { happy: true };
+      await promisify(fs.writeFile)(filePath, JSON.stringify(fileData));
       fileId = (await dbClient.insertOne('files',
-        { userId, name: 'note.txt', type: 'file', isPublic: true, parentId: folderId, localePath: filePath })).insertedId;
+        { userId, name: 'mood.json', type: 'file', isPublic: true, parentId: folderId, localPath: filePath })).insertedId;
 
       // Create private file owned by the first user
       privateFilePath= `${dirPath}/${uuidv4()}`;
       privateFileData = 'Top secret';
       await promisify(fs.writeFile)(privateFilePath, privateFileData);
       privateFileId = (await dbClient.insertOne('files',
-        { userId, name: 'note.txt', type: 'file', isPublic: false, parentId: folderId, localePath: filePath })).insertedId;
+        { userId, name: 'note.txt', type: 'file', isPublic: false, parentId: folderId, localPath: privateFilePath })).insertedId;
 
       // Create public image owned by th first user
       imagePath = `${dirPath}/${uuidv4()}`;
-      imageData = '^hmkkht*^$#';
+      imageData = Buffer.from('^hmkkht*^$#');
       await promisify(fs.writeFile)(imagePath, imageData);
       imageId = (await dbClient.insertOne('files',
-        { userId, name: 'cat.jpg', type: 'image', isPublic: true, parentId: '0', localePath: imagePath })).insertedId;
+        { userId, name: 'cat.jpg', type: 'image', isPublic: true, parentId: '0', localPath: imagePath })).insertedId;
 
       // Get an authentication token for the first user
       const auth64 = Buffer.from('ycok@myorg.com:mlop789').toString('base64');
@@ -178,9 +171,9 @@ describe('test FilesController routes', () => {
 
     it('Test getting inexistent file on disk', async () => {
 
-      // Insert file document with wrong localePath
+      // Insert file document with wrong localPath
       const inexistentFileId = (await dbClient.insertOne('files', {
-        userId, name: 'no-one.txt', type: 'file', isPublic: true, parentId: '0', localePath: '/tmp/files_manager/wrong'
+        userId, name: 'no-one.txt', type: 'file', isPublic: true, parentId: '0', localPath: '/tmp/files_manager/wrong'
         }))
         .insertedId;
 
@@ -195,9 +188,9 @@ describe('test FilesController routes', () => {
 
     it('Test getting inexistent image on disk', async () => {
 
-      // Insert image document with wrong localePath
+      // Insert image document with wrong localPath
       const inexistentImageId = (await dbClient.insertOne('files', {
-        userId, name: 'no-pic.png', type: 'image', isPublic: true, parentId: '0', localePath: '/tmp/files_manager/wrong'
+        userId, name: 'no-pic.png', type: 'image', isPublic: true, parentId: '0', localPath: '/tmp/files_manager/wrong'
         }))
         .insertedId;
 
@@ -208,6 +201,34 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
 
       await dbClient.deleteOne('files', { _id: inexistentImageId });
+    });
+
+    it('Test getting public JSON file', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${fileId}/data`)
+
+      expect(res).to.have.status(200);
+      expect(res.headers['content-type']).to.equal('application/json; charset=utf-8');
+      expect(res.body).to.eql(fileData);
+    });
+
+    it('Test getting private plain text file with correct authentication', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${privateFileId}/data`)
+        .set('X-Token', `${token}`)
+
+      expect(res).to.have.status(200);
+      expect(res.headers['content-type']).to.equal('text/plain; charset=utf-8');
+      expect(res.text).to.equal(privateFileData);
+    });
+
+    it('Test getting public image', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${imageId}/data`)
+
+      expect(res).to.have.status(200);
+      expect(res.headers['content-type']).to.equal('image/jpeg');
+      expect(res.body).to.eql(imageData);
     });
   });
 });
