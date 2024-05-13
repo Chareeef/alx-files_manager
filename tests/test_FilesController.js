@@ -95,6 +95,18 @@ describe('test FilesController routes', () => {
   });
 
   describe('Test POST /files', () => {
+
+    it('Test with wrong token', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}78`)
+        .set('Content-Type', 'application/json')
+        .send({ name: 'note.txt', type: 'file', data: Buffer.from('Heey').toString('base64') });
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.eql({ error: 'Unauthorized' });
+    });
+
     it('Test with missing name', async () => {
       const res = await chai.request(server)
         .post('/files')
@@ -104,6 +116,78 @@ describe('test FilesController routes', () => {
 
       expect(res).to.have.status(400);
       expect(res.body).to.eql({ error: 'Missing name' });
+    });
+
+    it('Test with wrong type', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({ name: 'note.txt', type: 'alien-file', data: Buffer.from('Heey').toString('base64') });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.eql({ error: 'Missing type' });
+    });
+
+    it('Test with missing type', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({ name: 'msg.txt', data: Buffer.from('Heey').toString('base64') });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.eql({ error: 'Missing type' });
+    });
+
+    it('Test creating file with missing data', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({ name: 'msg.txt', type: 'file' });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.eql({ error: 'Missing data' });
+    });
+
+    it('Test creating image with missing data', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({ name: 'cat.png', type: 'image' });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.eql({ error: 'Missing data' });
+    });
+
+    it('Test creating file with inexistent parent id', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          name: 'msg.txt', type: 'file',
+          data: Buffer.from('Heey').toString('base64'), parentId: 'f1e881cc7ba06511e683b23',
+        });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.eql({ error: 'Parent not found' });
+    });
+
+    it('Test creating file with a non-folder parent id', async () => {
+      const res = await chai.request(server)
+        .post('/files')
+        .set('X-Token', `${token}`)
+        .set('Content-Type', 'application/json')
+        .send({
+          name: 'msg.txt', type: 'file',
+          data: Buffer.from('Heey').toString('base64'), parentId: fileId,
+        });
+
+      expect(res).to.have.status(400);
+      expect(res.body).to.eql({ error: 'Parent is not a folder' });
     });
   });
 
@@ -117,7 +201,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('Test getting private file without authentication', async () => {
+    it('Test requesting private file without authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFileId}/data`);
 
@@ -125,7 +209,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('Test getting private file with wrong authentication', async () => {
+    it('Test requesting private file with wrong authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFileId}/data`)
         .set('X-Token', `${token2}`)
@@ -134,7 +218,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('Test getting private folder without authentication', async () => {
+    it('Test requesting private folder without authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFolderId}/data`);
 
@@ -142,7 +226,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('Test getting private folder with wrong authentication', async () => {
+    it('Test requesting private folder with wrong authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFolderId}/data`)
         .set('X-Token', `${token2}`);
@@ -151,7 +235,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('Test getting private folder', async () => {
+    it('Test requesting private folder', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFolderId}/data`)
         .set('X-Token', `${token}`);
@@ -160,7 +244,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'A folder doesn\'t have content' });
     });
 
-    it('Test getting public folder', async () => {
+    it('Test requesting public folder', async () => {
       const res = await chai.request(server)
         .get(`/files/${folderId}/data`)
         .set('X-Token', `${token}`);
@@ -169,7 +253,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'A folder doesn\'t have content' });
     });
 
-    it('Test getting inexistent file on disk', async () => {
+    it('Test requesting inexistent file on disk', async () => {
 
       // Insert file document with wrong localPath
       const inexistentFileId = (await dbClient.insertOne('files', {
@@ -186,7 +270,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: inexistentFileId });
     });
 
-    it('Test getting inexistent image on disk', async () => {
+    it('Test requesting inexistent image on disk', async () => {
 
       // Insert image document with wrong localPath
       const inexistentImageId = (await dbClient.insertOne('files', {
@@ -203,7 +287,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: inexistentImageId });
     });
 
-    it('Test getting public JSON file', async () => {
+    it('Test requesting public JSON file', async () => {
       const res = await chai.request(server)
         .get(`/files/${fileId}/data`)
 
@@ -212,7 +296,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql(fileData);
     });
 
-    it('Test getting private plain text file with correct authentication', async () => {
+    it('Test requesting private plain text file with correct authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFileId}/data`)
         .set('X-Token', `${token}`)
@@ -222,7 +306,7 @@ describe('test FilesController routes', () => {
       expect(res.text).to.equal(privateFileData);
     });
 
-    it('Test getting public image', async () => {
+    it('Test requesting public image', async () => {
       const res = await chai.request(server)
         .get(`/files/${imageId}/data`)
 
