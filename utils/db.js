@@ -54,6 +54,11 @@ class DBClient {
   async deleteMany(coll, filter) {
     return this.db.collection(coll).deleteMany(filter);
   }
+
+  // Delete one document from a collection
+  async deleteOne(coll, filter) {
+    return this.db.collection(coll).deleteOne(filter);
+  }
 }
 
 // Export a DBClient instance
