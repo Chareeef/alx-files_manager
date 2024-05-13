@@ -3,7 +3,7 @@ import { getStatus, getStats } from '../controllers/AppController';
 import { getConnect, disconnect } from '../controllers/AuthController';
 import { postNew, getMe } from '../controllers/UsersController';
 import {
-  postUpload, getShow, getIndex, publish, unpublish,
+  postUpload, getShow, getIndex, publish, unpublish, getFile
 } from '../controllers/FilesController';
 
 // Create router
@@ -62,6 +62,11 @@ router.put('/files/:id/publish', async (req, res) => {
 // 'PUT /files/:id/unpublish' route
 router.put('/files/:id/unpublish', async (req, res) => {
   await unpublish(req, res);
+});
+
+// 'GET /files/:id/data' route
+router.get('/files/:id/data', async (req, res) => {
+  await getFile(req, res);
 });
 
 // Export router
