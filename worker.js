@@ -1,4 +1,5 @@
 import Queue from 'bull';
+import fs from 'fs';
 import imageThumbnail from 'image-thumbnail';
 import { ObjectID } from 'mongodb';
 import dbClient from './utils/db';
