@@ -206,10 +206,7 @@ export async function getIndex(req, res) {
   }
 
   // Get page
-  const page = req.query.page ? Number(req.query.page) : 0;
-  if (!(page >= 0)) {
-    return res.json([]);
-  }
+  const page = Number(req.query.page) || 0;
 
   // Filter files, paginate, and return results
   const filesCollection = dbClient.db.collection('files');
