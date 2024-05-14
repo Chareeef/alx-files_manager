@@ -423,7 +423,13 @@ export async function getFile(req, res) {
   // Read file
   const readFile = promisify(fs.readFile);
   try {
-    const data = await readFile(file.localPath);
+    const filePath = file.localPath;
+    const size = req.query.size;
+
+    if (size) {
+      filePath = `${file.localPath}_${size}`;
+    }
+    const data = await readFile(filePath);
 
     // Send data with correct MIME-type
     return res.set('Content-Type', mime.lookup(file.name)).send(data);
