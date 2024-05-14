@@ -13,21 +13,15 @@ import waitConnection from './wait_connection.js';
 const { expect } = chai;
 chai.use(chaiHttp);
 
-describe('test FilesController routes', () => {
+describe('Test FilesController routes', () => {
   const dirPath = process.env.FOLDER_PATH || '/tmp/files_manager';
   let server;
-  let userId; let
-    userId2;
-  let folderId; let
-    privateFolderId;
-  let fileId; let filePath; let
-    fileData;
-  let privateFileId; let privateFilePath; let
-    privateFileData;
-  let imageId; let imagePath; let
-    imageData;
-  let token; let
-    token2;
+  let userId, userId2;
+  let folderId, privateFolderId;
+  let fileId, filePath, fileData;
+  let privateFileId, privateFilePath, privateFileData;
+  let imageId, imagePath, imageData;
+  let token, token2;
 
   before((done) => {
     // Start listening
@@ -115,8 +109,8 @@ describe('test FilesController routes', () => {
     server.close();
   });
 
-  describe('test POST /files', () => {
-    it('test with wrong token', async () => {
+  describe('Test POST /files', () => {
+    it('Test with wrong token', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}78`)
@@ -127,7 +121,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Unauthorized' });
     });
 
-    it('test with missing name', async () => {
+    it('Test with missing name', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -138,7 +132,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Missing name' });
     });
 
-    it('test with wrong type', async () => {
+    it('Test with wrong type', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -149,7 +143,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Missing type' });
     });
 
-    it('test with missing type', async () => {
+    it('Test with missing type', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -160,7 +154,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Missing type' });
     });
 
-    it('test creating file with missing data', async () => {
+    it('Test creating file with missing data', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -171,7 +165,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Missing data' });
     });
 
-    it('test creating image with missing data', async () => {
+    it('Test creating image with missing data', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -182,7 +176,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Missing data' });
     });
 
-    it('test creating file with inexistent parent id', async () => {
+    it('Test creating file with inexistent parent id', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -198,7 +192,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Parent not found' });
     });
 
-    it('test creating file with a non-folder parent id', async () => {
+    it('Test creating file with a non-folder parent id', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -214,7 +208,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Parent is not a folder' });
     });
 
-    it('test creating file without specifying parentId nor isPublic', async () => {
+    it('Test creating file without specifying parentId nor isPublic', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -264,7 +258,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: fileId });
     });
 
-    it('test creating file with specifying parentId and isPublic', async () => {
+    it('Test creating file with specifying parentId and isPublic', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -316,7 +310,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: fileId });
     });
 
-    it('test creating folder without specifying parentId nor isPublic', async () => {
+    it('Test creating folder without specifying parentId nor isPublic', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -356,7 +350,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: folderId });
     });
 
-    it('test creating folder with specifying parentId and isPublic', async () => {
+    it('Test creating folder with specifying parentId and isPublic', async () => {
       const res = await chai.request(server)
         .post('/files')
         .set('X-Token', `${token}`)
@@ -400,8 +394,8 @@ describe('test FilesController routes', () => {
     });
   });
 
-  describe('test GET /files/:id', async () => {
-    it('test with wrong token', async () => {
+  describe('Test GET /files/:id', async () => {
+    it('Test with wrong token', async () => {
       const res = await chai.request(server)
         .get(`/files/${fileId}`)
         .set('x-token', `${token}78`);
@@ -410,7 +404,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Unauthorized' });
     });
 
-    it('test with wrong file id', async () => {
+    it('Test with wrong file id', async () => {
       const res = await chai.request(server)
         .get(`/files/${fileId}8`)
         .set('x-token', `${token}`);
@@ -419,7 +413,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test with wrong user id', async () => {
+    it('Test with wrong user id', async () => {
       const res = await chai.request(server)
         .get(`/files/${fileId}`)
         .set('x-token', `${token2}`);
@@ -428,7 +422,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test successfully getting a file having a parentId', async () => {
+    it('Test successfully getting a file having a parentId', async () => {
       const res = await chai.request(server)
         .get(`/files/${fileId}`)
         .set('x-token', `${token}`);
@@ -446,7 +440,7 @@ describe('test FilesController routes', () => {
       );
     });
 
-    it('test successfully getting an image having no parentId', async () => {
+    it('Test successfully getting an image having no parentId', async () => {
       const res = await chai.request(server)
         .get(`/files/${imageId}`)
         .set('x-token', `${token}`);
@@ -464,7 +458,7 @@ describe('test FilesController routes', () => {
       );
     });
 
-    it('test successfully getting an folder having no parentId', async () => {
+    it('Test successfully getting an folder having no parentId', async () => {
       const res = await chai.request(server)
         .get(`/files/${folderId}`)
         .set('x-token', `${token}`);
@@ -483,26 +477,44 @@ describe('test FilesController routes', () => {
     });
   });
 
-  describe('test GET /files?parentId=[...]&page=[...]', async () => {
+  describe('Test GET /files?parentId=[...]&page=[...]', async () => {
     const docsToGet = [];
+    let folderId2;
     let token3;
 
     before(async () => {
       // Feed DB with files, images and folders owned by user 2
 
-      let path; let
-        newId;
+      folderId2 = (await dbClient
+        .insertOne('files',
+          {
+            userId: userId2,
+            name: 'documents2',
+            type: 'folder',
+            isPublic: true,
+            parentId: '0',
+          })
+        ).insertedId;
+
+      docsToGet.push({
+        id: folderId2.toString(),
+        userId: userId2.toString(),
+        name: 'documents2',
+        type: 'folder',
+        isPublic: true,
+        parentId: 0,
+      });
 
       // Add 4 files with a parentId set
       for (let i = 1; i <= 4; i++) {
-        path = `${dirPath}/file_${i}.txt`;
-        newId = (await dbClient.insertOne('files',
+        const path = `${dirPath}/file_${i}.txt`;
+        const newId = (await dbClient.insertOne('files',
           {
             userId: userId2,
             name: `file_${i}.txt`,
             type: 'file',
             isPublic: true,
-            parentId: folderId,
+            parentId: folderId2,
             localPath: path,
           })).insertedId;
 
@@ -512,14 +524,14 @@ describe('test FilesController routes', () => {
           name: `file_${i}.txt`,
           type: 'file',
           isPublic: true,
-          parentId: folderId.toString(),
+          parentId: folderId2.toString(),
         });
       }
 
       // Add 4 files with no parentId set
       for (let i = 5; i <= 8; i++) {
-        path = `${dirPath}/file_${i}`;
-        newId = (await dbClient.insertOne('files',
+        const path = `${dirPath}/file_${i}`;
+        const newId = (await dbClient.insertOne('files',
           {
             userId: userId2,
             name: `file_${i}.txt`,
@@ -541,14 +553,14 @@ describe('test FilesController routes', () => {
 
       // Add 4 images with a parentId set
       for (let i = 1; i <= 4; i++) {
-        path = `${dirPath}/image_${i}.png`;
-        newId = (await dbClient.insertOne('files',
+        const path = `${dirPath}/image_${i}.png`;
+        const newId = (await dbClient.insertOne('files',
           {
             userId: userId2,
             name: `image_${i}.png`,
             type: 'image',
             isPublic: true,
-            parentId: folderId,
+            parentId: folderId2,
             localPath: path,
           })).insertedId;
 
@@ -558,14 +570,14 @@ describe('test FilesController routes', () => {
           name: `image_${i}.png`,
           type: 'image',
           isPublic: true,
-          parentId: folderId.toString(),
+          parentId: folderId2.toString(),
         });
       }
 
       // Add 4 images with no parentId set
       for (let i = 5; i <= 8; i++) {
-        path = `${dirPath}/image_${i}.png`;
-        newId = (await dbClient.insertOne('files',
+        const path = `${dirPath}/image_${i}.png`;
+        const newId = (await dbClient.insertOne('files',
           {
             userId: userId2,
             name: `image_${i}.png`,
@@ -587,14 +599,14 @@ describe('test FilesController routes', () => {
 
       // Add 4 folders with a parentId set
       for (let i = 1; i <= 4; i++) {
-        path = `${dirPath}/folder_${i}`;
-        newId = (await dbClient.insertOne('files',
+        const path = `${dirPath}/folder_${i}`;
+        const newId = (await dbClient.insertOne('files',
           {
             userId: userId2,
             name: `folder_${i}`,
             type: 'folder',
             isPublic: true,
-            parentId: folderId,
+            parentId: folderId2,
             localPath: path,
           })).insertedId;
 
@@ -604,14 +616,14 @@ describe('test FilesController routes', () => {
           name: `folder_${i}`,
           type: 'folder',
           isPublic: true,
-          parentId: folderId.toString(),
+          parentId: folderId2.toString(),
         });
       }
 
       // Add 4 folders with no parentId set
       for (let i = 5; i <= 8; i++) {
-        path = `${dirPath}/folder_${i}`;
-        newId = (await dbClient.insertOne('files',
+        const path = `${dirPath}/folder_${i}`;
+        const newId = (await dbClient.insertOne('files',
           {
             userId: userId2,
             name: `folder_${i}`,
@@ -648,7 +660,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteMany('files', { userId: userId2 });
     });
 
-    it('test with wrong token', async () => {
+    it('Test with wrong token', async () => {
       const res = await chai.request(server)
         .get('/files')
         .set('x-token', `${token}78`);
@@ -657,7 +669,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Unauthorized' });
     });
 
-    it('test with a user with no files', async () => {
+    it('Test with a user with no files', async () => {
       const res = await chai.request(server)
         .get('/files')
         .set('x-token', `${token3}`);
@@ -666,7 +678,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql([]);
     });
 
-    it('test without specifying any query parameters', async () => {
+    it('Test without specifying any query parameters', async () => {
       const res = await chai.request(server)
         .get('/files')
         .set('x-token', `${token2}`);
@@ -675,7 +687,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql(docsToGet.slice(0, 20));
     });
 
-    it('test with: /files?page=0', async () => {
+    it('Test with: /files?page=0', async () => {
       const res = await chai.request(server)
         .get('/files?page=0')
         .set('x-token', `${token2}`);
@@ -684,7 +696,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql(docsToGet.slice(0, 20));
     });
 
-    it('test with: /files?page=1', async () => {
+    it('Test with: /files?page=1', async () => {
       const res = await chai.request(server)
         .get('/files?page=1')
         .set('x-token', `${token2}`);
@@ -693,7 +705,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql(docsToGet.slice(20, 40));
     });
 
-    it('test with: /files?page=2', async () => {
+    it('Test with: /files?page=2', async () => {
       const res = await chai.request(server)
         .get('/files?page=2')
         .set('x-token', `${token2}`);
@@ -702,9 +714,9 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql(docsToGet.slice(40, 60));
     });
 
-    it('test with: /files?parentId={wrongFolderId}', async () => {
+    it('Test with: /files?parentId={wrongFolderId} (owned by someone else)', async () => {
       const res = await chai.request(server)
-        .get(`/files?parentId=${fileId}`)
+        .get(`/files?parentId=${folderId}`)
         .set('x-token', `${token2}`);
 
       expect(res).to.have.status(200);
@@ -712,9 +724,9 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql([]);
     });
 
-    it('test with: /files?parentId={folderId}', async () => {
+    it('Test with: /files?parentId={folderId}', async () => {
       const res = await chai.request(server)
-        .get(`/files?parentId=${folderId}`)
+        .get(`/files?parentId=${folderId2}`)
         .set('x-token', `${token2}`);
 
       expect(res).to.have.status(200);
@@ -723,9 +735,9 @@ describe('test FilesController routes', () => {
         .to.eql(docsToGet.filter((doc) => doc.parentId != 0));
     });
 
-    it('test with: /files?parentId={folderId}&page=0', async () => {
+    it('Test with: /files?parentId={folderId}&page=0', async () => {
       const res = await chai.request(server)
-        .get(`/files?parentId=${folderId}&page=0`)
+        .get(`/files?parentId=${folderId2}&page=0`)
         .set('x-token', `${token2}`);
 
       expect(res).to.have.status(200);
@@ -734,9 +746,9 @@ describe('test FilesController routes', () => {
         .to.eql(docsToGet.filter((doc) => doc.parentId != 0));
     });
 
-    it('test with: /files?parentId={folderId}&page=1', async () => {
+    it('Test with: /files?parentId={folderId}&page=1', async () => {
       const res = await chai.request(server)
-        .get(`/files?parentId=${folderId}&page=1`)
+        .get(`/files?parentId=${folderId2}&page=1`)
         .set('x-token', `${token2}`);
 
       expect(res).to.have.status(200);
@@ -745,8 +757,8 @@ describe('test FilesController routes', () => {
     });
   });
 
-  describe('test GET /files/:id/data', async () => {
-    it('test with wrong file id', async () => {
+  describe('Test GET /files/:id/data', async () => {
+    it('Test with wrong file id', async () => {
       const res = await chai.request(server)
         .get('/files/45688876557/data');
 
@@ -754,7 +766,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test requesting private file without authentication', async () => {
+    it('Test requesting private file without authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFileId}/data`);
 
@@ -762,7 +774,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test requesting private file with wrong authentication', async () => {
+    it('Test requesting private file with wrong authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFileId}/data`)
         .set('X-Token', `${token2}`);
@@ -771,7 +783,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test requesting private folder without authentication', async () => {
+    it('Test requesting private folder without authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFolderId}/data`);
 
@@ -779,7 +791,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test requesting private folder with wrong authentication', async () => {
+    it('Test requesting private folder with wrong authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFolderId}/data`)
         .set('X-Token', `${token2}`);
@@ -788,7 +800,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'Not found' });
     });
 
-    it('test requesting private folder', async () => {
+    it('Test requesting private folder', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFolderId}/data`)
         .set('X-Token', `${token}`);
@@ -797,7 +809,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'A folder doesn\'t have content' });
     });
 
-    it('test requesting public folder', async () => {
+    it('Test requesting public folder', async () => {
       const res = await chai.request(server)
         .get(`/files/${folderId}/data`)
         .set('X-Token', `${token}`);
@@ -806,7 +818,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql({ error: 'A folder doesn\'t have content' });
     });
 
-    it('test requesting inexistent file on disk', async () => {
+    it('Test requesting inexistent file on disk', async () => {
       // Insert file document with wrong localPath
       const inexistentFileId = (await dbClient.insertOne('files', {
         userId, name: 'no-one.txt', type: 'file', isPublic: true, parentId: '0', localPath: '/tmp/files_manager/wrong',
@@ -822,7 +834,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: inexistentFileId });
     });
 
-    it('test requesting inexistent image on disk', async () => {
+    it('Test requesting inexistent image on disk', async () => {
       // Insert image document with wrong localPath
       const inexistentImageId = (await dbClient.insertOne('files', {
         userId, name: 'no-pic.png', type: 'image', isPublic: true, parentId: '0', localPath: '/tmp/files_manager/wrong',
@@ -838,7 +850,7 @@ describe('test FilesController routes', () => {
       await dbClient.deleteOne('files', { _id: inexistentImageId });
     });
 
-    it('test requesting public JSON file', async () => {
+    it('Test requesting public JSON file', async () => {
       const res = await chai.request(server)
         .get(`/files/${fileId}/data`);
 
@@ -847,7 +859,7 @@ describe('test FilesController routes', () => {
       expect(res.body).to.eql(fileData);
     });
 
-    it('test requesting private plain text file with correct authentication', async () => {
+    it('Test requesting private plain text file with correct authentication', async () => {
       const res = await chai.request(server)
         .get(`/files/${privateFileId}/data`)
         .set('X-Token', `${token}`);
@@ -857,7 +869,7 @@ describe('test FilesController routes', () => {
       expect(res.text).to.equal(privateFileData);
     });
 
-    it('test requesting public image', async () => {
+    it('Test requesting public image', async () => {
       const res = await chai.request(server)
         .get(`/files/${imageId}/data`);
 

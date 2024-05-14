@@ -222,9 +222,6 @@ export async function getIndex(req, res) {
     return res.json([]);
   }
 
-  // Get page
-  const page = Number(req.query.page) || 0;
-
   // Filter files, paginate, and return results
   const filesCollection = dbClient.db.collection('files');
   const matchQuery = {
@@ -232,8 +229,28 @@ export async function getIndex(req, res) {
   };
 
   if (parentId !== '0') {
-    matchQuery.parentId = parentId;
+
+    // Ensure it is a user's folder
+    try {
+      const folder = await dbClient.findOne('files', {
+        _id: parentId,
+        userId: user._id,
+      });
+
+      if (!folder) {
+        throw new Error('Not found');
+      }
+
+      // Add parentId to the match stage
+      matchQuery.parentId = parentId;
+
+    } catch (err) {
+      return res.json([]);
+    }
   }
+
+  // Get page
+  const page = Number(req.query.page) || 0;
 
   // Aggregate results
   const files = await filesCollection
