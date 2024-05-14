@@ -338,6 +338,78 @@ describe('test FilesController routes', () => {
     });
   });
 
+  describe('Test GET /files/:id', async () => {
+
+    it('Test with wrong token', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${fileId}`)
+        .set('X-Token', `${token}78`)
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.eql({ error: 'Unauthorized' });
+    });
+
+    it('Test with wrong file id', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${fileId}8`)
+        .set('x-token', `${token}`)
+
+      expect(res).to.have.status(404);
+      expect(res.body).to.eql({ error: 'Not found' });
+    });
+
+    it('Test with wrong user id', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${fileId}`)
+        .set('x-token', `${token2}`)
+
+      expect(res).to.have.status(404);
+      expect(res.body).to.eql({ error: 'Not found' });
+    });
+
+    it('Test successfully getting a file having a parentId', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${fileId}`)
+        .set('x-token', `${token}`)
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.eql(
+        {
+          id: fileId.toString(), userId: userId.toString(), name: 'mood.json',
+          type: 'file', isPublic: true, parentId: folderId.toString() ,
+        }
+      );
+    });
+
+    it('Test successfully getting an image having no parentId', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${imageId}`)
+        .set('x-token', `${token}`)
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.eql(
+        {
+          id: imageId.toString(), userId: userId.toString(), name: 'cat.jpg',
+          type: 'image', isPublic: true, parentId: 0,
+        }
+      );
+    });
+
+    it('Test successfully getting an folder having no parentId', async () => {
+      const res = await chai.request(server)
+        .get(`/files/${folderId}`)
+        .set('x-token', `${token}`)
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.eql(
+        {
+          id: folderId.toString(), userId: userId.toString(), name: 'documents',
+          type: 'folder', isPublic: true, parentId: 0,
+        }
+      );
+    });
+  });
+
   describe('Test GET /files/:id/data', async () => {
 
     it('Test with wrong file id', async () => {
