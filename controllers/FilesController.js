@@ -374,7 +374,7 @@ export async function unpublish(req, res) {
 export async function getFile(request, response) {
   const { id } = request.params;
   const files = dbClient.db.collection('files');
-  const idObject = new ObjectID(id);
+  const idObject = new ObjectId(id);
   files.findOne({ _id: idObject }, async (err, file) => {
     if (!file) {
       return response.status(404).json({ error: 'Not found' });
