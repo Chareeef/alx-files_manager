@@ -3,9 +3,9 @@ import { ObjectId } from 'mongodb';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime-types';
+import Queue from 'bull';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
-import Queue from 'bull';
 
 const fileQueue = new Queue('fileQueue');
 
@@ -65,10 +65,9 @@ export async function postUpload(req, res) {
   // The Parent ID (optional)
   let parentId;
   try {
-    parentId =
-      req.body.parentId && req.body.parentId !== '0'
-        ? new ObjectId(req.body.parentId)
-        : '0';
+    parentId = req.body.parentId && req.body.parentId !== '0'
+      ? new ObjectId(req.body.parentId)
+      : '0';
   } catch (err) {
     return res.status(400).json({ error: 'Parent not found' });
   }
@@ -129,7 +128,7 @@ export async function postUpload(req, res) {
   const localPath = `${folderPath}/${uuidv4()}`;
   await promisify(fs.writeFile)(
     localPath,
-    Buffer.from(data, 'base64').toString('utf-8')
+    Buffer.from(data, 'base64').toString('utf-8'),
   );
 
   // Create file's MongoDB document
@@ -214,10 +213,9 @@ export async function getIndex(req, res) {
   // Get parentId
   let parentId;
   try {
-    parentId =
-      req.query.parentId && req.query.parentId !== '0'
-        ? new ObjectId(req.query.parentId)
-        : '0';
+    parentId = req.query.parentId && req.query.parentId !== '0'
+      ? new ObjectId(req.query.parentId)
+      : '0';
   } catch (err) {
     return res.json([]);
   }
@@ -229,7 +227,6 @@ export async function getIndex(req, res) {
   };
 
   if (parentId !== '0') {
-
     // Ensure it is a user's folder
     try {
       const folder = await dbClient.findOne('files', {
@@ -243,7 +240,6 @@ export async function getIndex(req, res) {
 
       // Add parentId to the match stage
       matchQuery.parentId = parentId;
-
     } catch (err) {
       return res.json([]);
     }
@@ -314,7 +310,7 @@ export async function publish(req, res) {
       _id: new ObjectId(fileId),
       userId: user._id,
     },
-    { $set: { isPublic: true } }
+    { $set: { isPublic: true } },
   );
 
   // Return updated file
@@ -367,7 +363,7 @@ export async function unpublish(req, res) {
       _id: new ObjectId(fileId),
       userId: user._id,
     },
-    { $set: { isPublic: false } }
+    { $set: { isPublic: false } },
   );
 
   // Return updated file
