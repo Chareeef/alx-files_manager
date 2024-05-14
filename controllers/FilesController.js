@@ -419,7 +419,7 @@ export async function getFile(req, res) {
   // Read file
   const readFile = promisify(fs.readFile);
   try {
-    const filePath = file.localPath;
+    let filePath = file.localPath;
     const size = req.query.size;
 
     if (size) {
