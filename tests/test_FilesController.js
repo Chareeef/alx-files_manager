@@ -1013,10 +1013,40 @@ describe('Test FilesController routes', () => {
       });
     });
 
+    it('Test unpublishing with wrong token', async () => {
+      const res = await chai
+        .request(server)
+        .put(`/files/${fileId}/unpublish`)
+        .set('X-Token', `${token}22`);
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.eql({ error: 'Unauthorized' });
+    });
+
+    it('Test unpublishing with wrong file id', async () => {
+      const res = await chai
+        .request(server)
+        .put(`/files/${fileId}22/unpublish`)
+        .set('X-Token', `${token}`);
+
+      expect(res).to.have.status(404);
+      expect(res.body).to.eql({ error: 'Not found' });
+    });
+
+    it('Test unpublishing with wrong user id', async () => {
+      const res = await chai
+        .request(server)
+        .put(`/files/${fileId}/unpublish`)
+        .set('X-Token', `${token2}`);
+
+      expect(res).to.have.status(404);
+      expect(res.body).to.eql({ error: 'Not found' });
+    });
+
     it('Test unpublishing a public file', async () => {
       const res = await chai
         .request(server)
-        .put(`/files/${fileId}/publish`)
+        .put(`/files/${fileId}/unpublish`)
         .set('X-Token', `${token}`);
 
       expect(res).to.have.status(200);
