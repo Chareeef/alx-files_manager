@@ -1055,7 +1055,7 @@ describe('Test FilesController routes', () => {
         userId: userId.toString(),
         name: 'mood.json',
         type: 'file',
-        isPublic: false,
+        isPublic: true,
         parentId: folderId.toString(),
       });
     });
