@@ -4,14 +4,17 @@ import imageThumbnail from 'image-thumbnail';
 import { ObjectID } from 'mongodb';
 import dbClient from './utils/db';
 
+// Creat file Bull Queue for image processing
 const fileQueue = new Queue('fileQueue');
-// const userQueue = new Queue('userQueue');
+
+// Create a Bull Queue to welcome users
+const userQueue = new Queue('userQueue');
 
 async function thumbNail(width, localPath) {
-  const thumbnail = await imageThumbnail(localPath, { width });
-  return thumbnail;
+  return imageThumbnail(localPath, { width });
 }
 
+// Process fileQueue's jobs
 fileQueue.process(async (job, done) => {
   console.log('Processing Started!');
   const { fileId } = job.data;
@@ -48,4 +51,31 @@ fileQueue.process(async (job, done) => {
         done();
       }
     });
+});
+
+// Process userQueue's jobs
+userQueue.process(async (job, done) => {
+  // Check that userId is present in the job
+  if (!job.data.userId) {
+    return done(new Error('Missing userId'));
+  }
+
+  // Search user in DB
+  const user = await dbClient.findOne('users', { _id: new ObjectID(job.data.userId) });
+
+  // Fail the job if the user was not found
+  if (!user) {
+    return done(new Error('User not found'));
+  }
+
+  // Welcome the user
+  console.log(`Welcome ${user.email}`);
+
+  // Complete the job
+  return done();
+});
+
+// Show error if a job failed
+userQueue.on('failed', (job, err) => {
+  console.log(`Error: ${err.message}`);
 });

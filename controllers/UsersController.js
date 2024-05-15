@@ -1,8 +1,13 @@
 import { ObjectId } from 'mongodb';
 import sha1 from 'sha1';
+import Queue from 'bull';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
+// Create a Bull Queue to welcome users
+const userQueue = new Queue('userQueue');
+
+// Create new user
 export async function postNew(req, res) {
   const email = req.body ? req.body.email : null;
   const password = req.body ? req.body.password : null;
@@ -26,16 +31,21 @@ export async function postNew(req, res) {
     res.end();
     return;
   }
+
+  // Insert user
   const insertInfo = await dbClient.db.collection('users').insertOne({
     email,
     password: sha1(password),
   });
 
-  // Insert user
-  const userID = insertInfo.insertedId.toString();
+  // Get user's id
+  const userId = insertInfo.insertedId;
+
+  // Create a job for userQueue
+  userQueue.add({ userId });
 
   // Return response
-  res.status(201).json({ id: userID, email });
+  res.status(201).json({ id: userId.toString(), email });
 }
 
 export async function getMe(req, res) {

@@ -7,6 +7,7 @@ import Queue from 'bull';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
+// Creat file Bull Queue for image processing
 const fileQueue = new Queue('fileQueue');
 
 async function getUser(req) {
@@ -420,7 +421,7 @@ export async function getFile(req, res) {
   const readFile = promisify(fs.readFile);
   try {
     let filePath = file.localPath;
-    const size = req.query.size;
+    const { size } = req.query;
 
     if (size) {
       filePath = `${file.localPath}_${size}`;
