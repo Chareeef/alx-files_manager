@@ -983,6 +983,23 @@ describe('Test FilesController routes', () => {
       });
     });
 
+    it('Test publishing a private file', async () => {
+      const res = await chai
+        .request(server)
+        .post(`/files/${privateFileId}/publish`)
+        .set('X-Token', `${token}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.eql({
+        id: privateFileId.toString(),
+        userId: userId.toString(),
+        name: 'note.txt',
+        type: 'file',
+        isPublic: true,
+        parentId: folderId.toString(),
+      });
+    });
+
     it('Test unpublishing a public file', async () => {
       const res = await chai
         .request(server)
