@@ -966,27 +966,40 @@ describe('Test FilesController routes', () => {
     });
   });
   describe('Test PUT /files/:id/publish', async () => {
-    it('Test publishing a private file', async () => {
+    it('Test with wrong token', async () => {
       const res = await chai
         .request(server)
-        .post(`/files/${privateFileId}/publish`)
+        .put(`/files/${fileId}/publish`)
+        .set('X-Token', `${token}22`);
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.eql({ error: 'Unauthorized' });
+    });
+
+    it('Test with wrong file id', async () => {
+      const res = await chai
+        .request(server)
+        .put(`/files/${fileId}22/publish`)
         .set('X-Token', `${token}`);
 
-      expect(res).to.have.status(200);
-      expect(res.body).to.eql({
-        id: privateFileId.toString(),
-        userId: userId.toString(),
-        name: 'note.txt',
-        type: 'file',
-        isPublic: true,
-        parentId: folderId.toString(),
-      });
+      expect(res).to.have.status(404);
+      expect(res.body).to.eql({ error: 'Not found' });
+    });
+
+    it('Test with wrong user id', async () => {
+      const res = await chai
+        .request(server)
+        .put(`/files/${fileId}/publish`)
+        .set('X-Token', `${token2}`);
+
+      expect(res).to.have.status(404);
+      expect(res.body).to.eql({ error: 'Not found' });
     });
 
     it('Test publishing a private file', async () => {
       const res = await chai
         .request(server)
-        .post(`/files/${privateFileId}/publish`)
+        .put(`/files/${privateFileId}/publish`)
         .set('X-Token', `${token}`);
 
       expect(res).to.have.status(200);
@@ -1003,7 +1016,7 @@ describe('Test FilesController routes', () => {
     it('Test unpublishing a public file', async () => {
       const res = await chai
         .request(server)
-        .post(`/files/${fileId}/publish`)
+        .put(`/files/${fileId}/publish`)
         .set('X-Token', `${token}`);
 
       expect(res).to.have.status(200);
